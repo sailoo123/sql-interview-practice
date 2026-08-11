@@ -86,31 +86,37 @@
 .view-data-btn:hover{background:#f5f7fa}
 .req-data{margin-top:10px;max-height:280px;overflow:auto;border-top:1px solid #e5e7eb;padding-top:8px}
 .panel-collapse{
-  position:absolute;
-  top:12px;
+  position:fixed;
+  top:72px;
   width:32px;
-  height:36px;
-  border:1px solid #d7dce2;
+  height:38px;
+  border:1px solid #cbd5df;
   background:#fff;
   color:#245a93;
-  border-radius:0 5px 5px 0;
+  border-radius:0 6px 6px 0;
   cursor:pointer;
-  z-index:20;
-  font-size:22px;
-  line-height:30px;
+  z-index:3000;
+  font-size:24px;
+  line-height:32px;
+  padding:0;
+  box-shadow:0 1px 4px rgba(0,0,0,.12);
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
-.panel-collapse:hover{background:#f3f7fb}
-.left-collapse{right:-32px}
-.right-collapse{left:-32px;border-radius:5px 0 0 5px}
+.panel-collapse:hover{background:#eef6ff;color:#0b65a3}
+.left-collapse{left:300px}
+.right-collapse{right:300px;border-radius:6px 0 0 6px}
 .left.collapsed{width:0!important;min-width:0!important;padding:0!important;border-right:0!important;overflow:visible!important}
 .left.collapsed>*:not(#leftCollapseBtn){display:none!important}
-.left.collapsed #leftCollapseBtn{display:block!important}
+.left.collapsed #leftCollapseBtn{display:flex!important;left:0}
 .right.collapsed{width:0!important;min-width:0!important;padding:0!important;border-left:0!important;overflow:visible!important}
 .right.collapsed>*:not(#rightCollapseBtn){display:none!important}
-.right.collapsed #rightCollapseBtn{display:block!important}
+.right.collapsed #rightCollapseBtn{display:flex!important;right:0}
+@media(max-width:1050px){.left-collapse{left:250px}.right-collapse{right:0}}
 
 
-.pyspark-toolbar{display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid #d7dce2;border-bottom:0;background:#f8fafc;font-size:12px}.engine-badge{padding:4px 8px;border-radius:12px;border:1px solid #c7d2fe;background:#eef2ff;color:#3730a3;font-weight:700}#pysparkEditor{display:block;width:100%;min-height:320px;box-sizing:border-box;resize:vertical;border:0;background:#17212b;color:#f4f7fa;padding:16px;font:14px/1.5 Consolas,Monaco,monospace;outline:none}.pyspark-actions{display:flex;gap:8px;flex-wrap:wrap}.pyspark-result{margin-top:10px}.pyspark-info{padding:12px;border:1px solid #f0c36d;background:#fffaf0;border-radius:5px;font-size:13px;line-height:1.5}.compare-panel{margin:12px 0;border:1px solid #d7dce2;border-radius:5px;background:#fff;padding:12px}.compare-title{font-weight:700;margin-bottom:10px}.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.compare-grid pre{margin:0;padding:10px;background:#17212b;color:#f4f7fa;border-radius:4px;min-height:100px;white-space:pre-wrap;overflow:auto}.compare-grid h4{margin:0 0 6px}
+.code-tabs{display:flex;align-items:center;gap:4px}.code-tab{border:0!important;background:#fff!important;border-radius:0!important;padding:9px 7px!important;margin:0!important}.code-tab.active{border-bottom:2px solid #1268a0!important}.pyspark-note{padding:9px 12px;background:#f7f9fb;border-bottom:1px solid #d7dce2;font-size:12px;color:#555}.pysparkPanel textarea,#pysparkEditor{height:215px}.pyspark-note + textarea{display:block}.
 </style><script src="https://cdn.jsdelivr.net/npm/sql.js@1.13.0/dist/sql-wasm.js"></script></head><body>
 <div class=top><div class=brand>Learn SQL - Online SQL Terminal</div><span class=offline style="background:#eefaf0;color:#176b34;border-color:#b8dfc0">ONLINE</span><div class=top-nav><button class="top-btn status" id="online-status">● Database connected</button><span id=serverStatus style="color:#16803a;font-size:11px;white-space:nowrap"></span><button class=top-btn onclick="openDatabaseModal()">Database</button><button class=top-btn onclick="openSettings()">Settings</button><button class=top-btn onclick="openAllQuestions()">View All Questions</button></div></div>
 <div class=layout>
@@ -118,42 +124,11 @@
 <main class=center>
 <div class=question><div class=qbar><span class=label>Question</span><select id=filter class=select onchange=changeDifficulty()><option>All</option><option>Easy</option><option>Medium</option><option>Hard</option></select><button class=prev onclick=prevQ()>‹ Previous Question</button><button class=next onclick=nextQ()>Next Question ›</button></div><h2 id=title class=title></h2><div id=tags></div><p id=prompt></p><div><span id=requiredToggle class=toggle onclick=toggleRequired()>▸ Show Required Tables</span></div><div id=requiredSection class=hide><div class=required>Required tables</div><div id=req class="required-table-list"></div><div id=schema class="req-detail"></div></div><div><span class=toggle onclick=toggle('hint')>💡 Show Hint</span><span class=toggle onclick=toggle('expected')>▸ Show Expected Output</span><span class=toggle onclick=toggle('solution')>▸ Show Solution</span></div><div id=hint class="hint hide"></div><div id=expected class="hide" style="margin-top:10px"><b style="font-size:12px">Expected Output</b><div id=expectedTable class=preview></div></div><div id=solution class="hide"><b style="font-size:12px">Solution</b><div id=solutionText class=solution></div></div></div>
 <div style="font-size:12px;color:#555;margin-top:10px">Connected to a browser-based SQLite database. Type your SQL below and click <b>Run</b>. The checker validates only the result returned by your SQL.</div><div class=editor-wrap>
-<div class=tabs>
-  <button type="button" class="tab active" id="sqlTab" onclick="showCodeTab('sql')">SQL Query</button>
-  <button type="button" class="tab" id="pysparkTab" onclick="showCodeTab('pyspark')">PySpark Code</button>
-  <button id="clearTopBtn" type="button" class="toggle clear-control" onclick="clearSQL()">Clear</button>
+<div class="tabs code-tabs"><button type="button" class="tab code-tab active" id="sqlTab" onclick="switchCodeTab('sql')">SQL Query</button><button type="button" class="tab code-tab" id="pysparkTab" onclick="switchCodeTab('pyspark')">PySpark Code</button><button id="clearTopBtn" type="button" class="toggle clear-control" onclick="clearEd()">Clear</button></div>
+<div id="sqlPanel"><textarea id=editor spellcheck=false></textarea><div class=buttons><button class=run onclick="runQuery()">▶ Run</button><button onclick=formatSQL>Format SQL</button><button id="clearBtn" type="button" onclick="clearEd()">Clear</button><button onclick=resetDB>Reset Database</button></div><div id=status class=status></div></div>
+<div id="pysparkPanel" class="hide"><div class="pyspark-note">PySpark interview editor — write the equivalent PySpark solution for the same question.</div><textarea id="pysparkEditor" spellcheck=false placeholder="Write PySpark code here..."></textarea><div class=buttons><button class=run type="button" onclick="runPySparkEditor()">▶ Run PySpark</button><button type="button" onclick="formatPySparkEditor()">Format PySpark</button><button type="button" onclick="clearPySparkEditor()">Clear</button></div><div id="pysparkStatus" class=status></div></div>
 </div>
-<div id="sqlCodePanel">
-<textarea id=editor spellcheck=false></textarea>
-<div class=buttons><button class=run onclick="runQuery()">▶ Run</button><button onclick=formatSQL>Format SQL</button><button id="clearBtn" type="button" onclick="clearSQL()">Clear</button><button onclick=resetDB>Reset Database</button></div>
-</div>
-<div id="pysparkCodePanel" class="hide">
-  <div class="pyspark-toolbar"><span class="engine-badge">PySpark</span><span id="pysparkStatus">Editor ready</span></div>
-  <textarea id="pysparkEditor" spellcheck="false" placeholder="Write PySpark code here...
-
-Example:
-from pyspark.sql import functions as F
-from pyspark.sql.window import Window
-
-w = Window.partitionBy("department_id").orderBy(F.col("salary").desc())
-
-result = (
-    employees
-    .withColumn("rn", F.row_number().over(w))
-    .filter(F.col("rn") <= 3)
-)
-
-result.show()"></textarea>
-  <div class="buttons pyspark-actions">
-    <button class=run type="button" onclick="runPySpark()">▶ Run PySpark</button>
-    <button type="button" onclick="formatPySpark()">Format</button>
-    <button type="button" onclick="clearPySpark()">Clear</button>
-  </div>
-  <div id="pysparkResult" class="pyspark-result"></div>
-</div>
-<div id=status class=status></div>
-</div>
-<div id="comparePanel" class="compare-panel hide"><div class="compare-title">SQL ↔ PySpark Comparison</div><div class="compare-grid"><div><h4>SQL</h4><pre id="compareSQL"></pre></div><div><h4>PySpark</h4><pre id="comparePySpark"></pre></div></div></div><div class=resultbox><div class=resulthead>Query Result</div><div id=result class=result><div style="padding:12px;color:#6b7280">Write your query and click Run.</div></div></div>
+<div class=resultbox><div class=resulthead>Query Result</div><div id=result class=result><div style="padding:12px;color:#6b7280">Write your query and click Run.</div></div></div>
 </main>
 <aside class="right" id="rightPanel"><button class="panel-collapse right-collapse" id="rightCollapseBtn" type="button" onclick="toggleRightPanel()" title="Hide question bank">›</button><div class=sidecard><div class=sidehead>Progress</div><div class=progress><span id=prog>0 / 100 solved</span><div class=barbg><div id=bar class=bar></div></div></div></div><div class=sidecard><button id="qbankToggle" class="sidehead sidehead-btn" type="button" onclick="toggleQuestionBank()">▸ Question Bank <span id=count style="float:right;color:#6b7280"></span></button><div id=qbank class=hide></div></div></aside>
 </div>
@@ -190,13 +165,21 @@ function renderAllQuestionsModal(){let search=($('allQSearch').value||'').toLowe
 function renderTables(){let s=($('search').value||'').toLowerCase();$('dbmeta').textContent=tables.length+' tables';$('tables').innerHTML=tables.filter(t=>t.toLowerCase().includes(s)).map(t=>`<div class="catalog-table" onclick="showTable('${t}')"><span class=catalog-icon>▦</span><span class=catalog-name>${esc(t)}</span><span class=catalog-cols>${DATA.schemas[t].length} cols</span></div><div class=catalog-sub>${DATA.schemas[t].slice(0,4).map(c=>esc(c.name)).join(' · ')}${DATA.schemas[t].length>4?' · …':''}</div>`).join('')}
 function toggleDatabaseCatalog(){const c=$('dbContent'),a=$('dbArrow');const opening=c.classList.contains('hide');c.classList.toggle('hide');a.textContent=opening?'▾':'▸';if(opening)renderTables()}
 function showTable(t){openDatabaseModal(t)}
-function renderQuestions(){let f=$('filter').value;let arr=questions.map((q,i)=>({q,i})).filter(x=>f==='All'||x.q.difficulty===f);$('count').textContent=arr.length+' questions';$('qbank').innerHTML=arr.map(x=>`<div class="qitem ${x.i===current?'active':''}" onclick="loadQ(${x.i})"><span style="color:#777">${x.q.id}</span> ${esc(x.q.title)} <span class=diff>${x.q.difficulty}</span></div>`).join('')}
+function renderQuestions(){
+  let f=$('filter').value;
+  let arr=questions.map((q,i)=>({q,i})).filter(x=>f==='All'||x.q.difficulty===f);
+  $('count').textContent=arr.length+' questions';
+  $('qbank').innerHTML=arr.map((x,pos)=>`<div class="qitem ${x.i===current?'active':''}" onclick="loadQ(${x.i})"><span style="color:#777">Question ${pos+1}</span> ${esc(x.q.title)} <span class=diff>${x.q.difficulty}</span></div>`).join('')
+}
 function toggleQuestionBank(){const box=$('qbank'),btn=$('qbankToggle');const opening=box.classList.contains('hide');box.classList.toggle('hide');btn.firstChild.textContent=opening?'▾ Question Bank ':'▸ Question Bank '}
 function loadQ(i){
   current=(i+questions.length)%questions.length;
   let q=questions[current];
   $('title').textContent=q.title;
-  $('tags').innerHTML=`<span class=tag>${q.id}</span><span class=tag>${q.difficulty}</span><span class=tag>${esc(q.topic)}</span>`;
+  const filterValue=$('filter').value;
+  const sameDifficulty=questions.filter(x=>filterValue==='All'||x.difficulty===filterValue);
+  const localNumber=Math.max(1,sameDifficulty.findIndex(x=>x.id===q.id)+1);
+  $('tags').innerHTML=`<span class=tag>Question ${localNumber} of ${sameDifficulty.length}</span><span class=tag>${q.difficulty}</span>`;
   $('prompt').textContent=q.prompt;
 
   // Required tables are ALWAYS collapsed when a question is opened.
@@ -207,7 +190,7 @@ function loadQ(i){
   $('req').innerHTML=q.tables.map((t,idx)=>`<button type="button" class="required-table-btn" onclick="showRequiredTable(${idx})">▦ ${esc(t)}</button>`).join('');
   $('schema').innerHTML='';
 
-  $('hint').textContent=q.hint;
+  $('hint').innerHTML='<b>Topic:</b> '+esc(q.topic||'SQL')+'<br><br>'+esc(q.hint||'Build the result step by step.');
   $('solutionText').textContent=q.sql;
   $('hint').classList.add('hide');
   $('expected').classList.add('hide');
@@ -270,27 +253,44 @@ function changeDifficulty(){
     $('qbank').innerHTML='';
     return;
   }
+  // Each difficulty has an independent sequence:
+  // Easy 1,2,3... / Medium 1,2,3... / Hard 1,2,3...
   current=list[0].i;
   loadQ(current);
+  renderQuestions();
   window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function positionPanelArrows(){
+  const left=$('leftPanel'), right=$('rightPanel');
+  const lb=$('leftCollapseBtn'), rb=$('rightCollapseBtn');
+  if(!left||!right)return;
+  if(!left.classList.contains('collapsed')) lb.style.left=Math.round(left.getBoundingClientRect().right)+'px';
+  if(!right.classList.contains('collapsed')) rb.style.right=Math.round(window.innerWidth-right.getBoundingClientRect().width)+'px';
 }
 
 function toggleLeftPanel(){
   const p=$('leftPanel');
   const collapsed=p.classList.toggle('collapsed');
-  $('leftCollapseBtn').textContent=collapsed?'›':'‹';
-  $('leftCollapseBtn').title=collapsed?'Show database':'Hide database';
+  const b=$('leftCollapseBtn');
+  b.textContent=collapsed?'›':'‹';
+  b.title=collapsed?'Show database':'Hide database';
+  if(collapsed)b.style.left='0px'; else positionPanelArrows();
 }
 
 function toggleRightPanel(){
   const p=$('rightPanel');
   const collapsed=p.classList.toggle('collapsed');
-  $('rightCollapseBtn').textContent=collapsed?'‹':'›';
-  $('rightCollapseBtn').title=collapsed?'Show question bank':'Hide question bank';
+  const b=$('rightCollapseBtn');
+  b.textContent=collapsed?'‹':'›';
+  b.title=collapsed?'Show question bank':'Hide question bank';
+  if(collapsed)b.style.right='0px'; else positionPanelArrows();
 }
 
-function nextQ(){let f=$('filter').value;for(let n=1;n<=questions.length;n++){let i=(current+n)%questions.length;if(f==='All'||questions[i].difficulty===f){loadQ(i);window.scrollTo({top:0,behavior:'smooth'});return}}}
-function prevQ(){let f=$('filter').value;for(let n=1;n<=questions.length;n++){let i=(current-n+questions.length)%questions.length;if(f==='All'||questions[i].difficulty===f){loadQ(i);window.scrollTo({top:0,behavior:'smooth'});return}}}
+window.addEventListener('resize',positionPanelArrows);
+
+function nextQ(){let f=$('filter').value;for(let n=1;n<=questions.length;n++){let i=(current+n)%questions.length;if(f==='All'||questions[i].difficulty===f){loadQ(i);renderQuestions();window.scrollTo({top:0,behavior:'smooth'});return}}}
+function prevQ(){let f=$('filter').value;for(let n=1;n<=questions.length;n++){let i=(current-n+questions.length)%questions.length;if(f==='All'||questions[i].difficulty===f){loadQ(i);renderQuestions();window.scrollTo({top:0,behavior:'smooth'});return}}}
 
 function sqlGuidance(errorText,sql){
   const e=(errorText||'').toLowerCase();
@@ -367,13 +367,7 @@ function showSuccessPopup(message){
 }
 
 let db=null;
-async function 
-function showCodeTab(tab){const sql=document.getElementById('sqlCodePanel'),ps=document.getElementById('pysparkCodePanel'),st=document.getElementById('sqlTab'),pt=document.getElementById('pysparkTab');if(tab==='pyspark'){sql.classList.add('hide');ps.classList.remove('hide');st.classList.remove('active');pt.classList.add('active')}else{sql.classList.remove('hide');ps.classList.add('hide');st.classList.add('active');pt.classList.remove('active')}}
-function clearSQL(){const e=document.getElementById('editor');if(e)e.value='';const s=document.getElementById('status');if(s)s.innerHTML='';const r=document.getElementById('result');if(r)r.innerHTML='<div style="padding:12px;color:#6b7280">Write your query and click Run.</div>'}
-function clearPySpark(){const e=document.getElementById('pysparkEditor');if(e)e.value='';const r=document.getElementById('pysparkResult');if(r)r.innerHTML=''}
-function formatPySpark(){const e=document.getElementById('pysparkEditor');if(e)e.value=e.value.replace(/\r\n/g,'\n').split('\n').map(x=>x.replace(/[ \t]+$/,'')).join('\n')}
-function runPySpark(){const e=document.getElementById('pysparkEditor'),r=document.getElementById('pysparkResult'),s=document.getElementById('pysparkStatus'),code=(e?.value||'').trim();if(!code){r.innerHTML='<div class="pyspark-info">Write PySpark code first.</div>';return}s.textContent='Backend required for real execution';r.innerHTML='<div class="pyspark-info"><b>PySpark editor is ready.</b><br><br>Real PySpark execution needs a Python + Spark backend. GitHub Pages can host this UI but cannot run the Spark JVM itself. We will connect the backend in the next stage.</div>';document.getElementById('comparePanel').classList.remove('hide');document.getElementById('compareSQL').textContent=document.getElementById('editor')?.value||'';document.getElementById('comparePySpark').textContent=code}
-initDatabase(){
+async function initDatabase(){
   const SQL = await initSqlJs({
     locateFile: file => 'https://cdn.jsdelivr.net/npm/sql.js@1.13.0/dist/'+file
   });
@@ -525,7 +519,8 @@ function formatSQL(){let s=$('editor').value.replace(/\s+/g,' ').trim();['FROM',
 async function resetDB(){
   try{
     if(db) db.close();
-    await initDatabase().catch(err=>{
+    await positionPanelArrows();
+initDatabase().catch(err=>{
   const el=document.getElementById('online-status');
   if(el){el.textContent='● Browser SQL engine offline';el.classList.add('offline');}
   const st=document.getElementById('serverStatus');
@@ -540,6 +535,10 @@ async function resetDB(){
     $('status').innerHTML='<span class=error>✗ '+esc(e.message)+'</span>';
   }
 }
+function switchCodeTab(tab){const sql=document.getElementById('sqlPanel'),py=document.getElementById('pysparkPanel'),a=document.getElementById('sqlTab'),b=document.getElementById('pysparkTab');if(tab==='pyspark'){sql.classList.add('hide');py.classList.remove('hide');a.classList.remove('active');b.classList.add('active')}else{py.classList.add('hide');sql.classList.remove('hide');b.classList.remove('active');a.classList.add('active')}}
+function clearPySparkEditor(){const e=document.getElementById('pysparkEditor');if(e)e.value='';const s=document.getElementById('pysparkStatus');if(s)s.innerHTML=''}
+function formatPySparkEditor(){const e=document.getElementById('pysparkEditor');if(e)e.value=e.value.replace(/\r\n/g,'\n').split('\n').map(x=>x.replace(/[ \t]+$/,'')).join('\n')}
+function runPySparkEditor(){const e=document.getElementById('pysparkEditor'),s=document.getElementById('pysparkStatus');if(!e||!s)return;const code=e.value.trim();s.innerHTML=code?'<span style="color:#9a6700">⚠ PySpark code captured. Real Spark execution will be connected in the backend stage.</span>':'<span class=error>✗ Please enter PySpark code.</span>'}
 loadSettings();renderTables();renderQuestions();loadQ(0);
 
 // Explicit Clear button bindings (avoids inline-handler/browser caching issues).

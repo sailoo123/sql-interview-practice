@@ -159,13 +159,21 @@ function renderAllQuestionsModal(){let search=($('allQSearch').value||'').toLowe
 function renderTables(){let s=($('search').value||'').toLowerCase();$('dbmeta').textContent=tables.length+' tables';$('tables').innerHTML=tables.filter(t=>t.toLowerCase().includes(s)).map(t=>`<div class="catalog-table" onclick="showTable('${t}')"><span class=catalog-icon>▦</span><span class=catalog-name>${esc(t)}</span><span class=catalog-cols>${DATA.schemas[t].length} cols</span></div><div class=catalog-sub>${DATA.schemas[t].slice(0,4).map(c=>esc(c.name)).join(' · ')}${DATA.schemas[t].length>4?' · …':''}</div>`).join('')}
 function toggleDatabaseCatalog(){const c=$('dbContent'),a=$('dbArrow');const opening=c.classList.contains('hide');c.classList.toggle('hide');a.textContent=opening?'▾':'▸';if(opening)renderTables()}
 function showTable(t){openDatabaseModal(t)}
-function renderQuestions(){let f=$('filter').value;let arr=questions.map((q,i)=>({q,i})).filter(x=>f==='All'||x.q.difficulty===f);$('count').textContent=arr.length+' questions';$('qbank').innerHTML=arr.map(x=>`<div class="qitem ${x.i===current?'active':''}" onclick="loadQ(${x.i})"><span style="color:#777">${x.q.id}</span> ${esc(x.q.title)} <span class=diff>${x.q.difficulty}</span></div>`).join('')}
+function renderQuestions(){
+  let f=$('filter').value;
+  let arr=questions.map((q,i)=>({q,i})).filter(x=>f==='All'||x.q.difficulty===f);
+  $('count').textContent=arr.length+' questions';
+  $('qbank').innerHTML=arr.map((x,pos)=>`<div class="qitem ${x.i===current?'active':''}" onclick="loadQ(${x.i})"><span style="color:#777">Question ${pos+1}</span> ${esc(x.q.title)} <span class=diff>${x.q.difficulty}</span></div>`).join('')
+}
 function toggleQuestionBank(){const box=$('qbank'),btn=$('qbankToggle');const opening=box.classList.contains('hide');box.classList.toggle('hide');btn.firstChild.textContent=opening?'▾ Question Bank ':'▸ Question Bank '}
 function loadQ(i){
   current=(i+questions.length)%questions.length;
   let q=questions[current];
   $('title').textContent=q.title;
-  $('tags').innerHTML=`<span class=tag>${q.id}</span><span class=tag>${q.difficulty}</span><span class=tag>${esc(q.topic)}</span>`;
+  const filterValue=$('filter').value;
+  const sameDifficulty=questions.filter(x=>filterValue==='All'||x.difficulty===filterValue);
+  const localNumber=Math.max(1,sameDifficulty.findIndex(x=>x.id===q.id)+1);
+  $('tags').innerHTML=`<span class=tag>Question ${localNumber} of ${sameDifficulty.length}</span><span class=tag>${q.difficulty}</span>`;
   $('prompt').textContent=q.prompt;
 
   // Required tables are ALWAYS collapsed when a question is opened.
@@ -176,7 +184,7 @@ function loadQ(i){
   $('req').innerHTML=q.tables.map((t,idx)=>`<button type="button" class="required-table-btn" onclick="showRequiredTable(${idx})">▦ ${esc(t)}</button>`).join('');
   $('schema').innerHTML='';
 
-  $('hint').textContent=q.hint;
+  $('hint').innerHTML='<b>Topic:</b> '+esc(q.topic||'SQL')+'<br><br>'+esc(q.hint||'Build the result step by step.');
   $('solutionText').textContent=q.sql;
   $('hint').classList.add('hide');
   $('expected').classList.add('hide');
@@ -239,8 +247,11 @@ function changeDifficulty(){
     $('qbank').innerHTML='';
     return;
   }
+  // Each difficulty has an independent sequence:
+  // Easy 1,2,3... / Medium 1,2,3... / Hard 1,2,3...
   current=list[0].i;
   loadQ(current);
+  renderQuestions();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -272,8 +283,8 @@ function toggleRightPanel(){
 
 window.addEventListener('resize',positionPanelArrows);
 
-function nextQ(){let f=$('filter').value;for(let n=1;n<=questions.length;n++){let i=(current+n)%questions.length;if(f==='All'||questions[i].difficulty===f){loadQ(i);window.scrollTo({top:0,behavior:'smooth'});return}}}
-function prevQ(){let f=$('filter').value;for(let n=1;n<=questions.length;n++){let i=(current-n+questions.length)%questions.length;if(f==='All'||questions[i].difficulty===f){loadQ(i);window.scrollTo({top:0,behavior:'smooth'});return}}}
+function nextQ(){let f=$('filter').value;for(let n=1;n<=questions.length;n++){let i=(current+n)%questions.length;if(f==='All'||questions[i].difficulty===f){loadQ(i);renderQuestions();window.scrollTo({top:0,behavior:'smooth'});return}}}
+function prevQ(){let f=$('filter').value;for(let n=1;n<=questions.length;n++){let i=(current-n+questions.length)%questions.length;if(f==='All'||questions[i].difficulty===f){loadQ(i);renderQuestions();window.scrollTo({top:0,behavior:'smooth'});return}}}
 
 function sqlGuidance(errorText,sql){
   const e=(errorText||'').toLowerCase();

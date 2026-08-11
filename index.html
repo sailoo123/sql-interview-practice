@@ -7,6 +7,7 @@
 .question{background:#fff;border:1px solid #d7dce2;border-radius:4px;padding:16px}.qbar{display:flex;align-items:center;margin-bottom:14px}.qbar .label{font-size:17px}.select,.next{padding:7px 10px;border:1px solid #cbd1d8;background:#fff;border-radius:4px;margin-left:10px}.next{margin-left:auto;cursor:pointer}.title{font-size:18px;margin:0 0 12px;font-weight:500}.tag{display:inline-block;padding:3px 7px;border:1px solid #d9dee4;border-radius:10px;background:#f4f6f8;font-size:11px;margin-right:5px}.required{font-weight:600;margin-top:16px}.schema{margin-top:8px;border:1px solid #d9dee4;max-height:250px;overflow:auto}table{border-collapse:collapse;width:100%;font-size:12px}th,td{padding:7px 9px;border-bottom:1px solid #e5e7eb;text-align:left;white-space:nowrap}th{background:#f4f5f6;position:sticky;top:0}.toggle{color:#0b65a3;cursor:pointer;margin-right:13px;font-size:12px;display:inline-block;margin-top:12px}.hint{background:#fffbea;border:1px solid #f0d88a;padding:9px;margin-top:9px;border-radius:4px;font-size:12px;line-height:1.4}.solution{background:#17202b;color:#e8edf2;padding:10px;border-radius:4px;font:12px Consolas,monospace;white-space:pre-wrap;margin-top:8px;overflow:auto}.hide{display:none}
 .editor-wrap{margin-top:12px;background:#fff;border:1px solid #d7dce2}.tabs{border-bottom:1px solid #d7dce2;padding:0 12px}.tab{display:inline-block;padding:9px 4px;color:#1268a0;border-bottom:2px solid #1268a0}textarea{width:100%;height:215px;background:#18212c;color:#e6edf3;border:0;padding:13px;font:14px Consolas,monospace;resize:vertical;outline:none}.buttons{padding:10px;display:flex;gap:7px}button{padding:7px 11px;border:1px solid #cbd1d8;background:#fff;border-radius:4px;cursor:pointer}.run{background:#16803a;color:#fff;border-color:#16803a}.status{padding:0 10px 8px;font-size:12px}.success{color:#16803a}.error{color:#b42318}.resultbox{margin-top:12px;background:#fff;border:1px solid #d7dce2}.resulthead{padding:10px;font-weight:600;border-bottom:1px solid #d7dce2}.result{max-height:350px;overflow:auto}
 .sidecard{border:1px solid #d7dce2;margin-bottom:12px}.sidehead{padding:9px 10px;background:#f4f5f6;font-weight:600}.progress{padding:12px}.barbg{height:7px;background:#e8ebee;border-radius:8px;margin-top:8px}.bar{height:7px;background:#16803a;width:0;border-radius:8px}.qitem{padding:8px;border-top:1px solid #eee;font-size:12px;cursor:pointer}.qitem:hover{background:#f0f4f8}.qitem.active{background:#e8f2fb;border-left:3px solid #1670b8}.diff{float:right;color:#6b7280;font-size:10px}.preview{margin-top:10px;border:1px solid #d7dce2;max-height:300px;overflow:auto}
+.sidehead-btn{width:100%;border:0;text-align:left;cursor:pointer;font:inherit;color:inherit}.sidehead-btn:hover{background:#eef3f7}.prev{margin-left:auto}.qbar .prev + .next{margin-left:0}
 @media(max-width:1050px){.layout{grid-template-columns:240px 1fr}.right{display:none}}@media(max-width:700px){.layout{display:block}.left{display:none}.center{padding:8px}}
 
 .errorguide{margin:10px 0;padding:12px;border:1px solid #e3b4b4;background:#fff7f7;border-radius:4px;font-size:13px;line-height:1.5}
@@ -63,16 +64,61 @@
 .top{position:sticky;top:0;z-index:1000;min-width:0;gap:10px}.brand{white-space:nowrap}.top-nav{margin-left:auto;display:flex;align-items:center;gap:6px;min-width:0}.top-btn{border:0;background:#fff;color:#374151;padding:7px 9px;border-radius:7px;font-size:13px;white-space:nowrap}.top-btn:hover{background:#f3f6f9}.layout{grid-template-columns:300px minmax(0,1fr) 300px}.left{background:#fbfcfd}.dbhead{display:flex;align-items:center;gap:7px}.db-meta{margin-left:auto;color:#6b7280;font-size:10px;font-weight:400}.catalog-table{padding:10px 12px;border-top:1px solid #edf0f2;cursor:pointer;display:flex;align-items:center;gap:8px}.catalog-table:hover{background:#eef6ff}.catalog-icon{width:18px;height:18px;border:1px solid #9aa7b5;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#54708c}.catalog-name{font-weight:600}.catalog-cols{margin-left:auto;color:#6b7280;font-size:10px}.catalog-sub{padding:0 12px 9px 38px;color:#7a8490;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.question{max-width:1100px;margin:0 auto}.qbar{gap:8px;flex-wrap:wrap}.select{margin-left:0}.next{margin-left:auto}.center{min-width:0}.editor-wrap,.resultbox{max-width:1100px;margin-left:auto;margin-right:auto}.question{box-shadow:0 1px 2px rgba(0,0,0,.03)}.sidecard{border-radius:6px;overflow:hidden}.qitem{padding:9px 10px;line-height:1.35}.qitem.active{font-weight:600}.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.42);z-index:5000;display:flex;align-items:center;justify-content:center;padding:18px}.modal{width:min(1000px,96vw);max-height:90vh;overflow:auto;background:#fff;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.25);border:1px solid #d7dce2}.modal-head{position:sticky;top:0;z-index:2;background:#fff;border-bottom:1px solid #e5e7eb;padding:14px 16px;display:flex;align-items:center;gap:10px}.modal-title{font-size:17px;font-weight:700}.modal-close{margin-left:auto;border:0;font-size:20px;padding:2px 8px}.modal-body{padding:16px}.dataset-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}.dataset-chip{padding:6px 9px;border:1px solid #d7dce2;background:#fff;border-radius:14px;font-size:11px;cursor:pointer}.dataset-chip.active{background:#eaf4ff;border-color:#8fbce3;color:#0b65a3;font-weight:600}.catalog-detail{border:1px solid #d7dce2;border-radius:7px;overflow:hidden}.catalog-detail-head{padding:11px 12px;background:#f7f8fa;font-weight:700}.catalog-preview{max-height:340px;overflow:auto}.question-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.allq{border:1px solid #e0e5ea;border-radius:7px;padding:10px;cursor:pointer}.allq:hover{background:#f5f9fc;border-color:#b7c8d8}.allq strong{font-size:12px}.allq div{font-size:11px;margin-top:3px;color:#4b5563}.setting-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid #eef0f2}.setting-row:last-child{border-bottom:0}.setting-label{font-weight:600}.setting-desc{font-size:12px;color:#6b7280;margin-top:3px}
 @media(max-width:1050px){.layout{grid-template-columns:250px minmax(0,1fr)}.right{display:none}}
 @media(max-width:700px){body{font-size:14px}.top{height:auto;min-height:58px;padding:8px 10px;align-items:center;flex-wrap:wrap}.brand{font-size:16px;flex:1 1 auto}.top-nav{order:3;width:100%;overflow-x:auto;justify-content:flex-start;padding-top:2px}.top-btn{flex:0 0 auto;background:#f7f8fa}.layout{display:block;height:auto}.left{display:none}.center{padding:8px;background:#f7f8fa;overflow:visible}.question{padding:12px}.next{margin-left:auto;padding:8px 10px}.title{font-size:19px;line-height:1.25}.editor-wrap textarea{height:220px}.buttons{flex-wrap:wrap}.buttons button{flex:1 1 auto}.question-grid{grid-template-columns:1fr}.modal-backdrop{padding:8px}.modal{width:100%;max-height:94vh;border-radius:8px}.modal-body{padding:12px}.success-popup{left:10px;right:10px;top:10px;min-width:0}.result{max-width:100%;overflow:auto}.top-btn.status{font-size:11px}}
+.clear-control{border:0;background:transparent;cursor:pointer;padding:0;margin:0 0 0 14px;font:inherit;color:#1268a0}
+/* Collapsible practice.db catalog */
+.dbhead{cursor:pointer;user-select:none}
+.dbhead:hover{background:#edf3f8}
+.db-toggle{display:inline-block;width:14px;color:#536273;font-size:12px}
+.db-content{display:block}
+.db-content.hide{display:none!important}
+.db-search-wrap.hide{display:none!important}
+
+
+/* Required-table explorer: hidden by default, drill down table -> schema -> data */
+.required-table-list{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.required-table-btn{border:1px solid #cbd5e1;background:#f8fafc;border-radius:16px;padding:6px 10px;cursor:pointer;font-size:12px;color:#1f4f8a}
+.required-table-btn:hover{background:#eef6ff}
+.required-table-btn.active{background:#e8f2ff;border-color:#8db8ea;font-weight:700}
+.req-detail{margin-top:10px}
+.req-schema-card{border:1px solid #d7dce2;border-radius:5px;background:#fff;padding:10px}
+.req-schema-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.view-data-btn{border:1px solid #cbd5e1;background:#fff;border-radius:4px;padding:5px 9px;cursor:pointer;font-size:12px}
+.view-data-btn:hover{background:#f5f7fa}
+.req-data{margin-top:10px;max-height:280px;overflow:auto;border-top:1px solid #e5e7eb;padding-top:8px}
+.panel-collapse{
+  position:absolute;
+  top:12px;
+  width:32px;
+  height:36px;
+  border:1px solid #d7dce2;
+  background:#fff;
+  color:#245a93;
+  border-radius:0 5px 5px 0;
+  cursor:pointer;
+  z-index:20;
+  font-size:22px;
+  line-height:30px;
+}
+.panel-collapse:hover{background:#f3f7fb}
+.left-collapse{right:-32px}
+.right-collapse{left:-32px;border-radius:5px 0 0 5px}
+.left.collapsed{width:0!important;min-width:0!important;padding:0!important;border-right:0!important;overflow:visible!important}
+.left.collapsed>*:not(#leftCollapseBtn){display:none!important}
+.left.collapsed #leftCollapseBtn{display:block!important}
+.right.collapsed{width:0!important;min-width:0!important;padding:0!important;border-left:0!important;overflow:visible!important}
+.right.collapsed>*:not(#rightCollapseBtn){display:none!important}
+.right.collapsed #rightCollapseBtn{display:block!important}
+
 </style><script src="https://cdn.jsdelivr.net/npm/sql.js@1.13.0/dist/sql-wasm.js"></script></head><body>
 <div class=top><div class=brand>Learn SQL - Online SQL Terminal</div><span class=offline style="background:#eefaf0;color:#176b34;border-color:#b8dfc0">ONLINE</span><div class=top-nav><button class="top-btn status" id="online-status">● Database connected</button><span id=serverStatus style="color:#16803a;font-size:11px;white-space:nowrap"></span><button class=top-btn onclick="openDatabaseModal()">Database</button><button class=top-btn onclick="openSettings()">Settings</button><button class=top-btn onclick="openAllQuestions()">View All Questions</button></div></div>
 <div class=layout>
-<aside class=left><h3>SQL Database</h3><input id=search class=search placeholder="Search datasets / tables..." oninput=renderTables()><div class=db><div class=dbhead><b>practice.db</b><span class=db-meta id=dbmeta>18 tables</span><span style="color:#16803a">●</span></div><div id=tables></div></div><h3>Learning Resources</h3><div class=resource onclick="alert('JOINs: INNER JOIN, LEFT JOIN, self join, anti join and multi-table joins.')">JOINs</div><div class=resource onclick="alert('Window Functions: ROW_NUMBER, RANK, DENSE_RANK, LAG, LEAD and running totals.')">Window Functions</div><div class=resource onclick="alert('CTEs: build multi-step transformations using WITH.')">CTEs</div><div class=resource onclick="alert('Dates & Calendar: date parts, month analysis and calendar joins.')">Dates & Calendar</div><div class=resource onclick="alert('SCD Type 2: current records, history and point-in-time lookup.')">SCD Type 2</div></aside>
+<aside class="left" id="leftPanel"><button class="panel-collapse left-collapse" id="leftCollapseBtn" type="button" onclick="toggleLeftPanel()" title="Hide database">‹</button><h3>SQL Database</h3><div class=db><div class=dbhead id="dbToggle" onclick="toggleDatabaseCatalog()"><span id="dbArrow" class="db-toggle">▸</span><b>practice.db</b><span class=db-meta id=dbmeta>18 tables</span><span style="color:#16803a">●</span></div><div id="dbContent" class="db-content hide"><div class="db-search-wrap"><input id=search class=search placeholder="Search datasets / tables..." oninput=renderTables()></div><div id=tables></div></div></div></aside>
 <main class=center>
-<div class=question><div class=qbar><span class=label>Question</span><select id=filter class=select onchange=renderQuestions()><option>All</option><option>Easy</option><option>Medium</option><option>Hard</option></select><button class=next onclick=nextQ()>Next Question ›</button></div><h2 id=title class=title></h2><div id=tags></div><p id=prompt></p><div><span id=requiredToggle class=toggle onclick=toggleRequired()>▸ Show Required Tables</span></div><div id=requiredSection class=hide><div class=required>Required tables</div><div id=req style="margin-top:7px"></div><div id=schema></div></div><div><span class=toggle onclick=toggle('hint')>💡 Show Hint</span><span class=toggle onclick=toggle('expected')>▸ Show Expected Output</span><span class=toggle onclick=toggle('solution')>▸ Show Solution</span></div><div id=hint class="hint hide"></div><div id=expected class="hide" style="margin-top:10px"><b style="font-size:12px">Expected Output</b><div id=expectedTable class=preview></div></div><div id=solution class="hide"><b style="font-size:12px">Solution</b><div id=solutionText class=solution></div></div></div>
-<div style="font-size:12px;color:#555;margin-top:10px">Connected to a browser-based SQLite database. Type your SQL below and click <b>Run</b>. The checker validates only the result returned by your SQL.</div><div class=editor-wrap><div class=tabs><span class=tab>SQL Query</span><span class=toggle onclick=clearEd style="margin:0 0 0 14px">Clear</span></div><textarea id=editor spellcheck=false></textarea><div class=buttons><button class=run onclick="runQuery()">▶ Run</button><button onclick=formatSQL>Format SQL</button><button onclick=clearEd>Clear</button><button onclick=resetDB>Reset Database</button></div><div id=status class=status></div></div>
+<div class=question><div class=qbar><span class=label>Question</span><select id=filter class=select onchange=changeDifficulty()><option>All</option><option>Easy</option><option>Medium</option><option>Hard</option></select><button class=prev onclick=prevQ()>‹ Previous Question</button><button class=next onclick=nextQ()>Next Question ›</button></div><h2 id=title class=title></h2><div id=tags></div><p id=prompt></p><div><span id=requiredToggle class=toggle onclick=toggleRequired()>▸ Show Required Tables</span></div><div id=requiredSection class=hide><div class=required>Required tables</div><div id=req class="required-table-list"></div><div id=schema class="req-detail"></div></div><div><span class=toggle onclick=toggle('hint')>💡 Show Hint</span><span class=toggle onclick=toggle('expected')>▸ Show Expected Output</span><span class=toggle onclick=toggle('solution')>▸ Show Solution</span></div><div id=hint class="hint hide"></div><div id=expected class="hide" style="margin-top:10px"><b style="font-size:12px">Expected Output</b><div id=expectedTable class=preview></div></div><div id=solution class="hide"><b style="font-size:12px">Solution</b><div id=solutionText class=solution></div></div></div>
+<div style="font-size:12px;color:#555;margin-top:10px">Connected to a browser-based SQLite database. Type your SQL below and click <b>Run</b>. The checker validates only the result returned by your SQL.</div><div class=editor-wrap><div class=tabs><span class=tab>SQL Query</span><button id="clearTopBtn" type="button" class="toggle clear-control">Clear</button></div><textarea id=editor spellcheck=false></textarea><div class=buttons><button class=run onclick="runQuery()">▶ Run</button><button onclick=formatSQL>Format SQL</button><button id="clearBtn" type="button">Clear</button><button onclick=resetDB>Reset Database</button></div><div id=status class=status></div></div>
 <div class=resultbox><div class=resulthead>Query Result</div><div id=result class=result><div style="padding:12px;color:#6b7280">Write your query and click Run.</div></div></div>
 </main>
-<aside class=right><div class=sidecard><div class=sidehead>Progress</div><div class=progress><span id=prog>0 / 100 solved</span><div class=barbg><div id=bar class=bar></div></div></div></div><div class=sidecard><div class=sidehead>Question Bank <span id=count style="float:right;color:#6b7280"></span></div><div id=qbank></div></div></aside>
+<aside class="right" id="rightPanel"><button class="panel-collapse right-collapse" id="rightCollapseBtn" type="button" onclick="toggleRightPanel()" title="Hide question bank">›</button><div class=sidecard><div class=sidehead>Progress</div><div class=progress><span id=prog>0 / 100 solved</span><div class=barbg><div id=bar class=bar></div></div></div></div><div class=sidecard><button id="qbankToggle" class="sidehead sidehead-btn" type="button" onclick="toggleQuestionBank()">▸ Question Bank <span id=count style="float:right;color:#6b7280"></span></button><div id=qbank class=hide></div></div></aside>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/sql.js@1.13.0/dist/sql-wasm.js"></script>
 <script>
@@ -105,11 +151,109 @@ function renderDatabaseModal(selected){let search=($('datasetSearch').value||'')
 function openAllQuestions(){$('allQuestionsModal').classList.remove('hide');renderAllQuestionsModal()}
 function renderAllQuestionsModal(){let search=($('allQSearch').value||'').toLowerCase();let arr=questions.map((q,i)=>({q,i})).filter(x=>(x.q.id+' '+x.q.title+' '+x.q.topic+' '+x.q.difficulty).toLowerCase().includes(search));$('allQCount').textContent=arr.length+' of '+questions.length;$('allQBody').innerHTML=arr.map(x=>`<div class=allq onclick="closeModal('allQuestionsModal');loadQ(${x.i})"><strong>${esc(x.q.id)} · ${esc(x.q.title)}</strong><div>${esc(x.q.difficulty)} · ${esc(x.q.topic)}</div></div>`).join('')||'<div style="color:#6b7280">No questions found.</div>'}
 function renderTables(){let s=($('search').value||'').toLowerCase();$('dbmeta').textContent=tables.length+' tables';$('tables').innerHTML=tables.filter(t=>t.toLowerCase().includes(s)).map(t=>`<div class="catalog-table" onclick="showTable('${t}')"><span class=catalog-icon>▦</span><span class=catalog-name>${esc(t)}</span><span class=catalog-cols>${DATA.schemas[t].length} cols</span></div><div class=catalog-sub>${DATA.schemas[t].slice(0,4).map(c=>esc(c.name)).join(' · ')}${DATA.schemas[t].length>4?' · …':''}</div>`).join('')}
+function toggleDatabaseCatalog(){const c=$('dbContent'),a=$('dbArrow');const opening=c.classList.contains('hide');c.classList.toggle('hide');a.textContent=opening?'▾':'▸';if(opening)renderTables()}
 function showTable(t){openDatabaseModal(t)}
-function renderQuestions(){let f=$('filter').value;let arr=questions.map((q,i)=>({q,i})).filter(x=>f==='All'||x.q.difficulty===f);$('count').textContent=arr.length;$('qbank').innerHTML=arr.map(x=>`<div class="qitem ${x.i===current?'active':''}" onclick="loadQ(${x.i})"><span style="color:#777">${x.q.id}</span> ${esc(x.q.title)} <span class=diff>${x.q.difficulty}</span></div>`).join('')}
-function loadQ(i){current=(i+questions.length)%questions.length;let q=questions[current];$('title').textContent=q.title;$('tags').innerHTML=`<span class=tag>${q.id}</span><span class=tag>${q.difficulty}</span><span class=tag>${esc(q.topic)}</span>`;$('prompt').textContent=q.prompt;$('req').innerHTML=q.tables.map(t=>`<span class=tag>${t}</span>`).join('');$('hint').textContent=q.hint;$('solutionText').textContent=q.sql;let sh='<div class=schema>';q.tables.forEach(t=>{sh+='<b style="font-size:12px">'+t+'</b><table><tr><th>Column</th><th>Type</th><th>Key</th></tr>'+DATA.schemas[t].map(c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.type)}</td><td>${c.pk?'PRIMARY KEY':''}</td></tr>`).join('')+'</table><br>'});$('schema').innerHTML=sh+'</div>';let h='<table><tr>'+q.columns.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr>';q.expected.forEach(r=>h+='<tr>'+r.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>');$('expectedTable').innerHTML=h+'</table>';['hint','expected','solution'].forEach(x=>$(x).classList.add('hide'));const hideReq=localStorage.getItem('sqlPracticeReq')!=='0';$('requiredSection').classList.toggle('hide',hideReq);$('requiredToggle').textContent=hideReq?'▸ Show Required Tables':'▾ Hide Required Tables';$('editor').value='';$('status').textContent='';renderQuestions()}
+function renderQuestions(){let f=$('filter').value;let arr=questions.map((q,i)=>({q,i})).filter(x=>f==='All'||x.q.difficulty===f);$('count').textContent=arr.length+' questions';$('qbank').innerHTML=arr.map(x=>`<div class="qitem ${x.i===current?'active':''}" onclick="loadQ(${x.i})"><span style="color:#777">${x.q.id}</span> ${esc(x.q.title)} <span class=diff>${x.q.difficulty}</span></div>`).join('')}
+function toggleQuestionBank(){const box=$('qbank'),btn=$('qbankToggle');const opening=box.classList.contains('hide');box.classList.toggle('hide');btn.firstChild.textContent=opening?'▾ Question Bank ':'▸ Question Bank '}
+function loadQ(i){
+  current=(i+questions.length)%questions.length;
+  let q=questions[current];
+  $('title').textContent=q.title;
+  $('tags').innerHTML=`<span class=tag>${q.id}</span><span class=tag>${q.difficulty}</span><span class=tag>${esc(q.topic)}</span>`;
+  $('prompt').textContent=q.prompt;
+
+  // Required tables are ALWAYS collapsed when a question is opened.
+  $('requiredSection').classList.add('hide');
+  $('requiredToggle').textContent='▸ Show Required Tables';
+
+  // Show only the required table names initially. Schema/data are drill-down views.
+  $('req').innerHTML=q.tables.map((t,idx)=>`<button type="button" class="required-table-btn" onclick="showRequiredTable(${idx})">▦ ${esc(t)}</button>`).join('');
+  $('schema').innerHTML='';
+
+  $('hint').textContent=q.hint;
+  $('solutionText').textContent=q.sql;
+  $('hint').classList.add('hide');
+  $('expected').classList.add('hide');
+  $('solution').classList.add('hide');
+
+  let h='<table><tr>'+q.columns.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr>';
+  q.expected.forEach(r=>h+='<tr>'+r.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>');
+  $('expectedTable').innerHTML=h+'</table>';
+
+  $('editor').value='';
+  $('status').textContent='';
+  renderQuestions();
+}
+
+function toggleRequired(){
+  const s=$('requiredSection'), t=$('requiredToggle');
+  const opening=s.classList.contains('hide');
+  s.classList.toggle('hide');
+  t.textContent=opening?'▾ Hide Required Tables':'▸ Show Required Tables';
+  if(!opening){
+    $('schema').innerHTML='';
+  }
+}
+
+function showRequiredTable(index){
+  const q=questions[current];
+  const t=q.tables[index];
+  const schema=DATA.schemas[t];
+  document.querySelectorAll('.required-table-btn').forEach((b,i)=>b.classList.toggle('active',i===index));
+
+  const rows=DATA.data[t] ? DATA.data[t].rows : [];
+  const cols=DATA.data[t] ? DATA.data[t].columns : schema.map(c=>c.name);
+  const dataHtml=rows.length ? `<div class="req-data hide" id="reqData_${index}"><table><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr>${rows.map(r=>`<tr>${r.map(v=>`<td>${esc(v)}</td>`).join('')}</tr>`).join('')}</table></div>` : `<div class="req-data hide" id="reqData_${index}">No preview data available.</div>`;
+
+  $('schema').innerHTML=`<div class="req-schema-card">
+    <div class="req-schema-head"><b>${esc(t)}</b><button type="button" class="view-data-btn" onclick="toggleRequiredData(${index})">▸ View Data</button></div>
+    <table><tr><th>Column</th><th>Type</th><th>Key</th></tr>${schema.map(c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.type)}</td><td>${c.pk?'PRIMARY KEY':''}</td></tr>`).join('')}</table>
+    ${dataHtml}
+  </div>`;
+}
+
+function toggleRequiredData(index){
+  const el=$('reqData_'+index);
+  if(!el)return;
+  const btn=el.parentElement.querySelector('.view-data-btn');
+  const opening=el.classList.contains('hide');
+  el.classList.toggle('hide');
+  if(btn)btn.textContent=opening?'▾ Hide Data':'▸ View Data';
+}
+
 function toggle(id){$(id).classList.toggle('hide')}
+
+function changeDifficulty(){
+  const f=$('filter').value;
+  const list=questions.map((q,i)=>({q,i})).filter(x=>f==='All'||x.q.difficulty===f);
+  if(!list.length){
+    $('title').textContent='No questions found';
+    $('prompt').textContent='There are no questions for this difficulty.';
+    $('count').textContent='0 questions';
+    $('qbank').innerHTML='';
+    return;
+  }
+  current=list[0].i;
+  loadQ(current);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleLeftPanel(){
+  const p=$('leftPanel');
+  const collapsed=p.classList.toggle('collapsed');
+  $('leftCollapseBtn').textContent=collapsed?'›':'‹';
+  $('leftCollapseBtn').title=collapsed?'Show database':'Hide database';
+}
+
+function toggleRightPanel(){
+  const p=$('rightPanel');
+  const collapsed=p.classList.toggle('collapsed');
+  $('rightCollapseBtn').textContent=collapsed?'‹':'›';
+  $('rightCollapseBtn').title=collapsed?'Show question bank':'Hide question bank';
+}
+
 function nextQ(){let f=$('filter').value;for(let n=1;n<=questions.length;n++){let i=(current+n)%questions.length;if(f==='All'||questions[i].difficulty===f){loadQ(i);window.scrollTo({top:0,behavior:'smooth'});return}}}
+function prevQ(){let f=$('filter').value;for(let n=1;n<=questions.length;n++){let i=(current-n+questions.length)%questions.length;if(f==='All'||questions[i].difficulty===f){loadQ(i);window.scrollTo({top:0,behavior:'smooth'});return}}}
 
 function sqlGuidance(errorText,sql){
   const e=(errorText||'').toLowerCase();
@@ -316,12 +460,35 @@ async function runQuery(){
 }
 
 function updateProgress(){$('prog').textContent=solved.size+' / '+questions.length+' solved';$('bar').style.width=(solved.size/questions.length*100)+'%'}
-function clearEd(){$('editor').value='';$('status').textContent='';$('result').innerHTML='<div style="padding:12px;color:#6b7280">Write your query and click Run.</div>';const p=document.querySelector('.success-popup');if(p)p.remove()}
+function clearEd(){
+  try{
+    const editor=document.getElementById("editor");
+    if(editor){
+      editor.value="";
+      editor.textContent="";
+      editor.dispatchEvent(new Event("input",{bubbles:true}));
+      editor.dispatchEvent(new Event("change",{bubbles:true}));
+      editor.focus();
+    }
+    const status=document.getElementById("status");
+    if(status) status.innerHTML="";
+    const result=document.getElementById("result");
+    if(result) result.innerHTML='<div style="padding:12px;color:#6b7280">Write your query and click Run.</div>';
+    document.querySelectorAll(".success-popup").forEach(el=>el.remove());
+    document.querySelectorAll(".tutor-box,.sql-error-box,.feedback-box").forEach(el=>el.remove());
+  }catch(e){ console.error("Clear failed",e); }
+}
 function formatSQL(){let s=$('editor').value.replace(/\s+/g,' ').trim();['FROM','WHERE','GROUP BY','HAVING','ORDER BY','LEFT JOIN','INNER JOIN','LIMIT'].forEach(k=>s=s.replace(new RegExp('\\s'+k+'\\s','ig'),'\n'+k+' '));$('editor').value=s}
 async function resetDB(){
   try{
     if(db) db.close();
-    await initDatabase();
+    await initDatabase().catch(err=>{
+  const el=document.getElementById('online-status');
+  if(el){el.textContent='● Browser SQL engine offline';el.classList.add('offline');}
+  const st=document.getElementById('serverStatus');
+  if(st){st.textContent='SQL engine failed to load';st.style.color='#b42318';}
+  console.error(err);
+});
     $('result').innerHTML='<div style="padding:12px">Browser SQLite database reset successfully.</div>';
     $('status').innerHTML='<span class=success>✓ Browser SQLite database reset.</span>';
     solved.clear();
@@ -331,6 +498,14 @@ async function resetDB(){
   }
 }
 loadSettings();renderTables();renderQuestions();loadQ(0);
+
+// Explicit Clear button bindings (avoids inline-handler/browser caching issues).
+document.addEventListener("DOMContentLoaded", function(){
+  const top=document.getElementById("clearTopBtn");
+  const btn=document.getElementById("clearBtn");
+  if(top) top.addEventListener("click", function(e){e.preventDefault(); clearEd();});
+  if(btn) btn.addEventListener("click", function(e){e.preventDefault(); clearEd();});
+});
 initDatabase().catch(function(e){
   handleOffline();
   document.getElementById('serverStatus').textContent='● Browser SQL engine failed to load';

@@ -133,7 +133,7 @@
 <div class=layout>
 <aside class="left" id="leftPanel"><button class="panel-collapse left-collapse" id="leftCollapseBtn" type="button" onclick="toggleLeftPanel()" title="Hide database">‹</button><h3>SQL Database</h3><div class=db><div class=dbhead id="dbToggle" onclick="toggleDatabaseCatalog()"><span id="dbArrow" class="db-toggle">▸</span><b>practice.db</b><span class=db-meta id=dbmeta>18 tables</span><span style="color:#16803a">●</span></div><div id="dbContent" class="db-content hide"><div class="db-search-wrap"><input id=search class=search placeholder="Search datasets / tables..." oninput=renderTables()></div><div id=tables></div></div></div></aside>
 <main class=center>
-<div class=question><div class=qbar><span class=label>Question</span><select id=filter class=select onchange=changeDifficulty()><option>All</option><option>Easy</option><option>Medium</option><option>Hard</option></select><button class=prev onclick=prevQ()>‹ Previous Question</button><button class=next onclick=nextQ()>Next Question ›</button></div><h2 id=title class=title></h2><div id=tags></div><p id=prompt></p><div><span id=requiredToggle class=toggle onclick=toggleRequired()>▸ Show Required Tables</span></div><div id=requiredSection class=hide><div class=required>Required tables</div><div id=req class="required-table-list"></div><div id=schema class="req-detail"></div></div><div><span class=toggle onclick=toggle('hint')>💡 Show Hint</span><span class=toggle onclick=toggle('expected')>▸ Show Expected Output</span><span class=toggle onclick=toggle('solution')>▸ Show Solution</span></div><div id=hint class="hint hide"></div><div id=expected class="hide" style="margin-top:10px"><b style="font-size:12px">Expected Output</b><div id=expectedTable class=preview></div></div><div id=solution class="hide"><b style="font-size:12px">Solution</b><div id=solutionText class=solution></div></div></div>
+<div class=question><div class=qbar><span class=label>Question</span><select id=filter class=select onchange=changeDifficulty()><option>All</option><option>Easy</option><option>Medium</option><option>Hard</option></select><button class=prev onclick=prevQ()>‹ Previous Question</button><button class=next onclick=nextQ()>Next Question ›</button></div><h2 id=title class=title></h2><div id=tags></div><p id=prompt></p><div><span id=requiredToggle class=toggle onclick=toggleRequired()>▸ Show Required Tables</span></div><div id=requiredSection class=hide><div class=required>Required tables</div><div id=req class="required-table-list"></div><div id=schema class="req-detail"></div></div><div><span class=toggle onclick=toggle('hint')>💡 Show Hint</span><span class=toggle onclick=toggle('expected')>▸ Show Expected Output</span><span class=toggle onclick=toggle('solution')>▸ Show Solution</span><span class=toggle onclick=toggle('pysolution')>▸ Show PySpark Solution</span></div><div id=hint class="hint hide"></div><div id=expected class="hide" style="margin-top:10px"><b style="font-size:12px">Expected Output</b><div id=expectedTable class=preview></div></div><div id=solution class="hide"><b style="font-size:12px">SQL Solution</b><div id=solutionText class=solution></div></div><div id="pysolution" class="hide"><b style="font-size:12px">PySpark Solution</b><div id="pySolutionText" class="solution"></div></div></div>
 <div id="editorDescription" style="font-size:12px;color:#555;margin-top:10px">Connected to a browser-based SQLite database. Type your SQL below and click <b>Run</b>. The checker validates the result returned by your SQL.</div><div class=editor-wrap><div class=code-tabs><button id="sqlTab" class="code-tab active" type="button" onclick="switchCodeTab('sql')">SQL Query</button><button id="pyTab" class="code-tab" type="button" onclick="switchCodeTab('pyspark')">PySpark Code</button><button id="clearTopBtn" type="button" class="code-clear">Clear</button></div><textarea id=editor class="code-editor active" spellcheck=false placeholder="Write your SQL query here..."></textarea><textarea id=pyEditor class="code-editor" spellcheck=false placeholder="Write your PySpark code here...
 
 Example:
@@ -177,6 +177,376 @@ function toggleDatabaseCatalog(){const c=$('dbContent'),a=$('dbArrow');const ope
 function showTable(t){openDatabaseModal(t)}
 function renderQuestions(){let f=$('filter').value;let arr=questions.map((q,i)=>({q,i})).filter(x=>f==='All'||x.q.difficulty===f);$('count').textContent=arr.length+' questions';$('qbank').innerHTML=arr.map(x=>`<div class="qitem ${x.i===current?'active':''}" onclick="loadQ(${x.i})"><span style="color:#777">${x.q.id}</span> ${esc(x.q.title)} <span class=diff>${x.q.difficulty}</span></div>`).join('')}
 function toggleQuestionBank(){const box=$('qbank'),btn=$('qbankToggle');const opening=box.classList.contains('hide');box.classList.toggle('hide');btn.firstChild.textContent=opening?'▾ Question Bank ':'▸ Question Bank '}
+function pySparkSolution(q){
+  const solutions={"SQL01": "from pyspark.sql import functions as F
+
+e = spark.table(\"employees\")
+avg_salary = e.groupBy(\"department_id\").agg(F.avg(\"salary\").alias(\"avg_salary\"))
+
+result = (e.join(avg_salary, \"department_id\")
+    .filter(F.col(\"salary\") > F.col(\"avg_salary\"))
+    .select(\"employee_name\", \"department_id\", \"salary\")
+    .orderBy(\"department_id\", F.col(\"salary\").desc()))", "SQL02": "from pyspark.sql import functions as F
+
+e = spark.table(\"employees\")
+max_salary = e.agg(F.max(\"salary\").alias(\"max_salary\"))
+result = (e.crossJoin(max_salary)
+    .filter(F.col(\"salary\") < F.col(\"max_salary\"))
+    .agg(F.max(\"salary\").alias(\"second_highest_salary\")))", "SQL03": "from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+
+e = spark.table(\"employees\")
+w = Window.partitionBy(\"department_id\").orderBy(F.col(\"salary\").desc())
+result = (e.withColumn(\"salary_rank\", F.dense_rank().over(w))
+    .filter(F.col(\"salary_rank\") <= 3)
+    .select(\"employee_name\", \"department_id\", \"salary\", \"salary_rank\")
+    .orderBy(\"department_id\", \"salary_rank\", F.col(\"salary\").desc()))", "SQL04": "from pyspark.sql import functions as F
+
+e = spark.table(\"employees\").alias(\"e\")
+m = spark.table(\"managers\").alias(\"m\")
+result = (e.join(m, F.col(\"e.manager_id\") == F.col(\"m.manager_id\"), \"left\")
+    .select(F.col(\"e.employee_name\"), F.col(\"e.job_title\"), F.col(\"m.manager_name\"))
+    .orderBy(F.col(\"e.employee_id\")))", "SQL05": "from pyspark.sql import functions as F
+
+d = spark.table(\"departments\").alias(\"d\")
+e = spark.table(\"employees\").alias(\"e\")
+result = (d.join(e, F.col(\"d.department_id\") == F.col(\"e.department_id\"), \"left\")
+    .filter(F.col(\"e.employee_id\").isNull())
+    .select(\"d.department_id\", \"d.department_name\")
+    .orderBy(\"d.department_id\"))", "SQL06": "from pyspark.sql import functions as F
+
+d = spark.table(\"departments\").alias(\"d\")
+e = spark.table(\"employees\").alias(\"e\")
+result = (d.join(e, \"department_id\")
+    .groupBy(\"d.department_id\", \"d.department_name\")
+    .agg(F.count(\"e.employee_id\").alias(\"employee_count\"), F.min(\"e.salary\").alias(\"minimum_salary\"), F.max(\"e.salary\").alias(\"maximum_salary\"), F.round(F.avg(\"e.salary\"), 2).alias(\"average_salary\"))
+    .orderBy(F.col(\"average_salary\").desc()))", "SQL07": "from pyspark.sql import functions as F
+result = (spark.table(\"duplicate_customers\")
+    .groupBy(\"email\").agg(F.count(\"*\").alias(\"duplicate_count\"))
+    .filter(F.col(\"duplicate_count\") > 1)
+    .orderBy(F.col(\"duplicate_count\").desc(), \"email\"))", "SQL08": "from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+
+d = spark.table(\"duplicate_customers\")
+w = Window.partitionBy(\"email\").orderBy(F.col(\"created_at\").desc(), F.col(\"record_id\").desc())
+result = (d.withColumn(\"rn\", F.row_number().over(w)).filter(F.col(\"rn\") == 1)
+    .select(\"record_id\", \"customer_name\", \"email\", \"phone\", \"city\", \"created_at\")
+    .orderBy(\"record_id\"))", "SQL09": "from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+
+d = spark.table(\"duplicate_customers\")
+w = Window.partitionBy(\"email\").orderBy(\"created_at\", \"record_id\")
+result = (d.withColumn(\"rn\", F.row_number().over(w)).filter(F.col(\"rn\") > 1)
+    .select(\"record_id\", \"customer_name\", \"email\", \"created_at\")
+    .orderBy(\"email\", \"created_at\"))", "SQL10": "from pyspark.sql import functions as F
+c = spark.table(\"customers\").alias(\"c\")
+o = spark.table(\"orders\").alias(\"o\")
+result = (c.join(o, F.col(\"c.customer_id\") == F.col(\"o.customer_id\"), \"left\")
+    .filter(F.col(\"o.order_id\").isNull())
+    .select(\"c.customer_id\", \"c.customer_name\").orderBy(\"c.customer_id\"))", "SQL11": "from pyspark.sql import functions as F
+c = spark.table(\"customers\").alias(\"c\")
+o = spark.table(\"orders\").alias(\"o\")
+result = (c.join(o, \"customer_id\").filter(F.col(\"status\") == \"Delivered\")
+    .groupBy(\"customer_id\", \"customer_name\").agg(F.sum(\"total_amount\").alias(\"revenue\"))
+    .orderBy(F.col(\"revenue\").desc()).limit(3))", "SQL12": "from pyspark.sql import functions as F
+p = spark.table(\"products\").alias(\"p\")
+oi = spark.table(\"order_items\").alias(\"oi\")
+result = (p.join(oi, F.col(\"p.product_id\") == F.col(\"oi.product_id\"), \"left\")
+    .filter(F.col(\"oi.product_id\").isNull())
+    .select(\"p.product_id\", \"p.product_name\").orderBy(\"p.product_id\"))", "SQL13": "from pyspark.sql import functions as F
+result = (spark.table(\"order_items\")
+    .withColumn(\"line_total\", F.col(\"quantity\") * F.col(\"unit_price\") * (1 - F.col(\"discount_pct\") / 100.0))
+    .groupBy(\"order_id\").agg(F.round(F.sum(\"line_total\"), 2).alias(\"calculated_total\"))
+    .orderBy(\"order_id\"))", "SQL14": "from pyspark.sql import functions as F
+p = spark.table(\"products\")
+oi = spark.table(\"order_items\")
+result = (p.join(oi, \"product_id\").groupBy(\"product_id\", \"product_name\")
+    .agg(F.sum(\"quantity\").alias(\"total_quantity\"))
+    .orderBy(F.col(\"total_quantity\").desc(), \"product_id\").limit(1))", "SQL15": "from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+s = spark.table(\"sales\")
+w = Window.orderBy(\"sale_date\", \"sale_id\").rowsBetween(Window.unboundedPreceding, Window.currentRow)
+result = (s.withColumn(\"running_revenue\", F.sum(\"net_amount\").over(w))
+    .select(\"sale_date\", \"sale_id\", \"net_amount\", \"running_revenue\")
+    .orderBy(\"sale_date\", \"sale_id\"))", "SQL16": "from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+o = spark.table(\"orders\")
+w = Window.partitionBy(\"customer_id\").orderBy(\"order_date\", \"order_id\")
+result = (o.withColumn(\"previous_order_date\", F.lag(\"order_date\").over(w))
+    .select(\"customer_id\", \"order_id\", \"order_date\", \"previous_order_date\")
+    .orderBy(\"customer_id\", \"order_date\"))", "SQL17": "from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+e = spark.table(\"employees\")
+w = Window.partitionBy(\"department_id\").orderBy(F.col(\"salary\").desc())
+result = (e.withColumn(\"salary_rank\", F.dense_rank().over(w))
+    .select(\"employee_name\", \"department_id\", \"salary\", \"salary_rank\")
+    .orderBy(\"department_id\", \"salary_rank\", \"employee_name\"))", "SQL18": "from pyspark.sql import functions as F
+e = spark.table(\"employees\")
+avg = e.agg(F.avg(\"salary\").alias(\"company_avg\"))
+result = (e.crossJoin(avg).filter(F.col(\"salary\") > F.col(\"company_avg\"))
+    .select(\"employee_name\", \"salary\").orderBy(F.col(\"salary\").desc()))", "SQL19": "from pyspark.sql import functions as F
+result = (spark.table(\"sales\").withColumn(\"month\", F.substring(\"sale_date\", 1, 7))
+    .groupBy(\"month\").agg(F.sum(\"net_amount\").alias(\"revenue\"))
+    .orderBy(\"month\"))", "SQL20": "from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+m = (spark.table(\"sales\").withColumn(\"month\", F.substring(\"sale_date\", 1, 7))
+     .groupBy(\"month\").agg(F.sum(\"net_amount\").alias(\"revenue\")))
+w = Window.orderBy(\"month\")
+result = (m.withColumn(\"previous_month_revenue\", F.lag(\"revenue\").over(w))
+    .withColumn(\"growth_percent\", F.round(100 * (F.col(\"revenue\") - F.col(\"previous_month_revenue\")) / F.when(F.col(\"previous_month_revenue\") != 0, F.col(\"previous_month_revenue\")), 2))
+    .orderBy(\"month\"))", "SQL21": "from pyspark.sql import functions as F
+result = (spark.table(\"employee_scd2\").filter(F.col(\"is_current\") == 1)
+    .select(\"employee_id\", \"department_id\", \"job_title\", \"salary\", \"effective_from\")
+    .orderBy(\"employee_id\"))", "SQL22": "from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+d = spark.table(\"employee_scd2\")
+w = Window.partitionBy(\"employee_id\").orderBy(\"effective_from\")
+result = (d.withColumn(\"version_number\", F.row_number().over(w))
+    .select(\"employee_id\", \"version_number\", \"job_title\", \"salary\", \"effective_from\")
+    .orderBy(\"employee_id\", \"effective_from\"))", "SQL23": "from pyspark.sql import functions as F
+d = spark.table(\"employee_scd2\")
+result = (d.filter((F.col(\"employee_id\") == 1) & (F.lit(\"2023-06-01\") >= F.col(\"effective_from\")) & (F.lit(\"2023-06-01\") <= F.coalesce(F.col(\"effective_to\"), F.lit(\"9999-12-31\"))))
+    .select(\"*\"))", "SQL24": "from pyspark.sql import functions as F
+result = (spark.table(\"employee_scd2\").groupBy(\"employee_id\")
+    .agg(F.count(\"*\").alias(\"version_count\"))
+    .filter(F.col(\"version_count\") > 1).orderBy(\"employee_id\"))", "SQL25": "from pyspark.sql import functions as F
+t = spark.table(\"transactions\")
+result = (t.groupBy(\"payment_method\")
+    .agg(F.round(100 * F.sum(F.when(F.col(\"status\") == \"Success\", 1).otherwise(0)) / F.count(\"*\"), 2).alias(\"success_rate_percent\"))
+    .orderBy(\"payment_method\"))", "SQL26": "from pyspark.sql import functions as F
+result = (spark.table(\"login_history\").filter(F.col(\"login_status\") == \"Failed\")
+    .groupBy(\"employee_id\").agg(F.count(\"*\").alias(\"failed_login_count\"))
+    .orderBy(\"employee_id\"))", "SQL27": "from pyspark.sql import functions as F
+l = spark.table(\"login_history\")
+result = (l.filter((F.col(\"login_status\") == \"Success\") & F.col(\"logout_time\").isNotNull())
+    .withColumn(\"hours_logged\", F.round((F.unix_timestamp(\"logout_time\") - F.unix_timestamp(\"login_time\")) / 3600, 2))
+    .select(\"employee_id\", \"login_time\", \"hours_logged\").orderBy(\"login_time\"))", "SQL28": "from pyspark.sql import functions as F
+s = spark.table(\"sales\").alias(\"s\")
+d = spark.table(\"date_calendar\").alias(\"d\")
+result = (s.join(d, F.col(\"s.sale_date\") == F.col(\"d.full_date\"))
+    .groupBy(\"d.is_weekend\").agg(F.sum(\"s.net_amount\").alias(\"revenue\"))
+    .orderBy(\"d.is_weekend\"))", "SQL29": "from pyspark.sql import functions as F
+p = spark.table(\"patients\"); a = spark.table(\"admissions\")
+result = (p.join(a, \"patient_id\").groupBy(\"patient_id\", \"patient_name\")
+    .agg(F.count(\"admission_id\").alias(\"admission_count\"))
+    .filter(F.col(\"admission_count\") > 1).orderBy(\"patient_id\"))", "SQL30": "from pyspark.sql import functions as F
+result = spark.table(\"admissions\").agg(F.max(\"number_of_visits\").alias(\"max_visits\"), F.min(\"number_of_visits\").alias(\"min_visits\"), F.round(F.avg(\"number_of_visits\"), 2).alias(\"average_visits\"))", "SQL31": "from pyspark.sql import functions as F
+e = spark.table(\"employees\"); s = spark.table(\"sales\")
+result = (e.join(s, \"employee_id\").groupBy(\"employee_id\", \"employee_name\")
+    .agg(F.sum(\"net_amount\").alias(\"total_revenue\"))
+    .orderBy(F.col(\"total_revenue\").desc()).limit(1))", "SQL32": "from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+s = spark.table(\"sales\"); e = spark.table(\"employees\")
+r = (s.join(e, s.employee_id == e.employee_id).groupBy(\"region\", e.employee_id, e.employee_name)
+     .agg(F.sum(\"net_amount\").alias(\"revenue\")))
+w = Window.partitionBy(\"region\").orderBy(F.col(\"revenue\").desc())
+result = (r.withColumn(\"rnk\", F.dense_rank().over(w)).filter(F.col(\"rnk\") <= 2)
+    .select(\"region\", \"employee_id\", \"employee_name\", \"revenue\", \"rnk\")
+    .orderBy(\"region\", \"rnk\", \"employee_name\"))", "SQL33": "from pyspark.sql import functions as F
+o = spark.table(\"orders\")
+avg = o.groupBy(\"customer_id\").agg(F.avg(\"total_amount\").alias(\"avg_order_value\"))
+result = (o.join(avg, \"customer_id\").filter(F.col(\"total_amount\") > F.col(\"avg_order_value\"))
+    .select(\"order_id\", \"customer_id\", \"total_amount\")
+    .orderBy(\"customer_id\", F.col(\"total_amount\").desc()))", "SQL34": "from pyspark.sql import functions as F
+c = spark.table(\"customers\")
+has_order = spark.table(\"orders\").select(\"customer_id\").distinct()
+has_payment = spark.table(\"transactions\").filter(F.col(\"status\") == \"Success\").select(\"customer_id\").distinct()
+result = (c.join(has_order, \"customer_id\").join(has_payment, \"customer_id\")
+    .select(\"customer_id\", \"customer_name\").orderBy(\"customer_id\"))", "SQL35": "from pyspark.sql import functions as F
+e = spark.table(\"employees\").alias(\"e\"); m = spark.table(\"managers\").alias(\"m\")
+result = (e.join(m, F.col(\"e.manager_id\") == F.col(\"m.manager_id\"))
+    .filter(F.substring(F.col(\"e.hire_date\"),1,4) == F.substring(F.col(\"m.hire_date\"),1,4))
+    .select(F.col(\"e.employee_name\"), F.col(\"e.hire_date\").alias(\"employee_hire_date\"), F.col(\"m.manager_name\"), F.col(\"m.hire_date\").alias(\"manager_hire_date\"))
+    .orderBy(F.col(\"e.employee_id\")))", "SQL36": "from pyspark.sql import functions as F
+e = spark.table(\"employees\")
+result = (e.groupBy(\"department_id\").agg(F.count(\"*\").alias(\"headcount\"))
+    .orderBy(F.col(\"headcount\").desc(), \"department_id\").limit(1))", "SQL37": "from pyspark.sql import functions as F
+result = (spark.table(\"orders\").groupBy(\"customer_id\")
+    .agg(F.min(\"order_date\").alias(\"first_order_date\"), F.max(\"order_date\").alias(\"latest_order_date\"))
+    .orderBy(\"customer_id\"))", "SQL38": "from pyspark.sql import functions as F
+o = spark.table(\"orders\").alias(\"o\"); oi = spark.table(\"order_items\").alias(\"oi\")
+calc = (oi.withColumn(\"line_total\", F.col(\"quantity\")*F.col(\"unit_price\")*(1-F.col(\"discount_pct\")/100.0))
+        .groupBy(\"order_id\").agg(F.round(F.sum(\"line_total\"),2).alias(\"calculated_total\")))
+result = (o.join(calc, \"order_id\").select(\"order_id\", \"total_amount\", \"calculated_total\").orderBy(\"order_id\"))", "SQL39": "from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+s = spark.table(\"salaries\")
+w = Window.partitionBy(\"employee_id\").orderBy(F.col(\"effective_from\").desc())
+result = (s.withColumn(\"rn\", F.row_number().over(w)).filter(F.col(\"rn\") == 1)
+    .select(\"employee_id\", \"salary\", \"effective_from\", \"effective_to\").orderBy(\"employee_id\"))", "SQL40": "from pyspark.sql import functions as F
+o = spark.table(\"orders\")
+top = o.select(\"total_amount\").distinct().orderBy(F.col(\"total_amount\").desc()).limit(3)
+result = o.join(top, \"total_amount\").select(\"order_id\", \"customer_id\", \"total_amount\").orderBy(F.col(\"total_amount\").desc(), \"order_id\")", "SQL41": "from pyspark.sql import functions as F
+e = spark.table(\"employees\").alias(\"e\"); d = spark.table(\"departments\").alias(\"d\")
+result = (e.join(d, F.col(\"e.department_id\") == F.col(\"d.department_id\"))
+    .select(\"e.employee_name\", \"d.department_name\").orderBy(\"d.department_name\", \"e.employee_name\"))", "SQL42": "from pyspark.sql import functions as F
+result = spark.table(\"employees\").filter(F.col(\"salary\") > 1000000).select(\"employee_name\", \"salary\").orderBy(F.col(\"salary\").desc())", "SQL43": "from pyspark.sql import functions as F
+result = spark.table(\"employees\").filter(F.col(\"city\") == \"Hyderabad\").select(\"employee_name\", \"city\").orderBy(\"employee_name\")", "SQL44": "from pyspark.sql import functions as F
+result = (spark.table(\"employees\").filter((F.col(\"status\") == \"Active\") & (F.col(\"hire_date\") > \"2021-12-31\"))
+    .select(\"employee_name\", \"hire_date\", \"status\").orderBy(\"hire_date\"))", "SQL45": "from pyspark.sql import functions as F
+result = (spark.table(\"employees\").filter(F.col(\"manager_id\").isNull())
+    .select(\"employee_id\", \"employee_name\", \"manager_id\").orderBy(\"employee_id\"))", "SQL46": "from pyspark.sql import functions as F
+result = (spark.table(\"employees\").groupBy(\"city\").agg(F.count(\"*\").alias(\"employee_count\"))
+    .orderBy(F.col(\"employee_count\").desc(), \"city\"))", "SQL47": "from pyspark.sql import functions as F
+result = (spark.table(\"employees\").groupBy(\"department_id\")
+    .agg(F.round(F.avg(\"salary\"),2).alias(\"average_salary\"))
+    .orderBy(\"department_id\"))", "SQL48": "from pyspark.sql import functions as F
+result = (spark.table(\"employees\").groupBy(\"department_id\")
+    .agg(F.avg(\"salary\").alias(\"average_salary\"))
+    .filter(F.col(\"average_salary\") > 900000)
+    .orderBy(F.col(\"average_salary\").desc()))", "SQL49": "from pyspark.sql import functions as F
+result = (spark.table(\"employees\").groupBy(\"department_id\")
+    .agg(F.count(\"*\").alias(\"employee_count\"), F.sum(\"salary\").alias(\"payroll\"))
+    .orderBy(\"department_id\"))", "SQL50": "from pyspark.sql import functions as F
+e=spark.table(\"employees\").alias(\"e\"); d=spark.table(\"departments\").alias(\"d\")
+result=(e.join(d,F.col(\"e.department_id\")==F.col(\"d.department_id\"))
+ .select(\"e.employee_name\",\"d.department_name\").orderBy(\"e.employee_name\"))", "SQL51": "from pyspark.sql import functions as F
+d=spark.table(\"departments\"); e=spark.table(\"employees\")
+result=(d.join(e,\"department_id\",\"left\").groupBy(\"department_id\",\"department_name\")
+ .agg(F.count(\"employee_id\").alias(\"employee_count\")).orderBy(\"department_id\"))", "SQL52": "from pyspark.sql import functions as F
+e=spark.table(\"employees\").alias(\"e\"); m=spark.table(\"managers\").alias(\"m\")
+result=(e.join(m,F.col(\"e.manager_id\")==F.col(\"m.manager_id\"),\"left\")
+ .select(F.col(\"e.employee_name\"),F.col(\"m.manager_name\")).orderBy(F.col(\"e.employee_id\")))", "SQL53": "from pyspark.sql import functions as F
+m=spark.table(\"managers\"); e=spark.table(\"employees\")
+avg=e.agg(F.avg(\"salary\").alias(\"avg_salary\"))
+result=(m.crossJoin(avg).filter(F.col(\"salary\")>F.col(\"avg_salary\"))
+ .select(\"manager_name\",\"salary\").orderBy(F.col(\"salary\").desc()))", "SQL54": "from pyspark.sql import functions as F
+c=spark.table(\"customers\"); o=spark.table(\"orders\").select(\"customer_id\").distinct()
+result=(c.join(o,\"customer_id\").select(\"customer_id\",\"customer_name\").orderBy(\"customer_id\"))", "SQL55": "from pyspark.sql import functions as F
+result=(spark.table(\"transactions\").groupBy(\"payment_method\")
+ .agg(F.count(\"*\").alias(\"transaction_count\")).orderBy(\"payment_method\"))", "SQL56": "from pyspark.sql import functions as F
+result=(spark.table(\"orders\").groupBy(\"customer_id\")
+ .agg(F.count(\"*\").alias(\"order_count\")).orderBy(\"customer_id\"))", "SQL57": "from pyspark.sql import functions as F
+result=(spark.table(\"transactions\").filter(F.col(\"status\")==\"Success\")
+ .agg(F.sum(\"amount\").alias(\"successful_transaction_amount\")))", "SQL58": "from pyspark.sql import functions as F
+c=spark.table(\"customers\").alias(\"c\"); o=spark.table(\"orders\").alias(\"o\")
+result=(c.join(o,F.col(\"c.customer_id\")==F.col(\"o.customer_id\"),\"left\")
+ .groupBy(\"c.customer_id\",\"c.customer_name\")
+ .agg(F.coalesce(F.sum(F.when(F.col(\"o.status\")==\"Delivered\",F.col(\"o.total_amount\")).otherwise(0)),F.lit(0)).alias(\"delivered_revenue\"))
+ .orderBy(F.col(\"delivered_revenue\").desc(),\"c.customer_name\"))", "SQL59": "from pyspark.sql import functions as F
+result=spark.table(\"transactions\").filter(F.col(\"status\")==\"Failed\").select(\"transaction_id\",\"customer_id\",\"amount\").orderBy(\"transaction_id\")", "SQL60": "from pyspark.sql import functions as F
+result=(spark.table(\"products\").withColumn(\"profit_per_unit\",F.round(F.col(\"price\")-F.col(\"cost\"),2))
+ .select(\"product_name\",\"profit_per_unit\").orderBy(F.col(\"profit_per_unit\").desc(),\"product_name\"))", "SQL61": "from pyspark.sql import functions as F
+p=spark.table(\"products\")
+result=(p.withColumn(\"profit_margin_pct\",F.round((F.col(\"price\")-F.col(\"cost\"))*100/F.col(\"price\"),2))
+ .filter((F.col(\"price\")>0)&(F.col(\"profit_margin_pct\")>30))
+ .select(\"product_name\",\"profit_margin_pct\").orderBy(F.col(\"profit_margin_pct\").desc(),\"product_name\"))", "SQL62": "from pyspark.sql import functions as F
+p=spark.table(\"products\"); oi=spark.table(\"order_items\")
+result=(p.join(oi,\"product_id\").withColumn(\"line_total\",F.col(\"quantity\")*F.col(\"unit_price\")*(1-F.col(\"discount_pct\")/100.0))
+ .groupBy(\"category\").agg(F.round(F.sum(\"line_total\"),2).alias(\"revenue\"))
+ .orderBy(F.col(\"revenue\").desc(),\"category\"))", "SQL63": "from pyspark.sql import functions as F
+p=spark.table(\"products\"); oi=spark.table(\"order_items\")
+result=(p.join(oi,\"product_id\").groupBy(\"product_id\",\"product_name\")
+ .agg(F.sum(\"quantity\").alias(\"total_quantity\")).orderBy(F.col(\"total_quantity\").desc(),\"product_id\").limit(1))", "SQL64": "from pyspark.sql import functions as F
+p=spark.table(\"products\").alias(\"p\"); oi=spark.table(\"order_items\").alias(\"oi\")
+result=(p.join(oi,F.col(\"p.product_id\")==F.col(\"oi.product_id\"),\"left\")
+ .filter(F.col(\"oi.product_id\").isNull()).select(\"p.product_id\",\"p.product_name\").orderBy(\"p.product_id\"))", "SQL65": "from pyspark.sql import functions as F
+o=spark.table(\"orders\").alias(\"o\"); oi=spark.table(\"order_items\").alias(\"oi\")
+calc=(oi.withColumn(\"line_total\",F.col(\"quantity\")*F.col(\"unit_price\")*(1-F.col(\"discount_pct\")/100.0))
+ .groupBy(\"order_id\").agg(F.round(F.sum(\"line_total\"),2).alias(\"calculated_total\")))
+result=(o.join(calc,\"order_id\").select(\"order_id\",\"total_amount\",\"calculated_total\").orderBy(\"order_id\"))", "SQL66": "from pyspark.sql import functions as F
+result=(spark.table(\"order_items\").groupBy(\"order_id\")
+ .agg(F.sum(\"quantity\").alias(\"total_item_quantity\"))
+ .filter(F.col(\"total_item_quantity\")>3).orderBy(F.col(\"total_item_quantity\").desc(),\"order_id\"))", "SQL67": "from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+o=spark.table(\"orders\")
+w=Window.partitionBy(\"customer_id\").orderBy(F.col(\"order_date\").desc(),F.col(\"order_id\").desc())
+result=(o.withColumn(\"rn\",F.row_number().over(w)).filter(F.col(\"rn\")==1)
+ .select(\"customer_id\",\"order_id\",\"order_date\").orderBy(\"customer_id\"))", "SQL68": "from pyspark.sql import functions as F
+e=spark.table(\"employees\"); mx=e.agg(F.max(\"salary\").alias(\"max_salary\"))
+result=(e.crossJoin(mx).filter(F.col(\"salary\")<F.col(\"max_salary\"))
+ .agg(F.max(\"salary\").alias(\"second_highest_salary\")))", "SQL69": "from pyspark.sql import functions as F
+result=spark.table(\"employees\").select(\"salary\").distinct().orderBy(F.col(\"salary\").desc()).limit(3)", "SQL70": "from pyspark.sql import functions as F
+e=spark.table(\"employees\"); mx=e.agg(F.max(\"salary\").alias(\"max_salary\"))
+result=(e.crossJoin(mx).filter(F.col(\"salary\")==F.col(\"max_salary\"))
+ .select(\"employee_name\",\"salary\").orderBy(\"employee_name\"))", "SQL71": "from pyspark.sql import functions as F
+e=spark.table(\"employees\"); avg=e.agg(F.avg(\"salary\").alias(\"avg_salary\"))
+result=(e.crossJoin(avg).filter(F.col(\"salary\")>F.col(\"avg_salary\"))
+ .select(\"employee_name\",\"salary\").orderBy(F.col(\"salary\").desc(),\"employee_name\"))", "SQL72": "from pyspark.sql import functions as F
+e=spark.table(\"employees\"); mx=e.groupBy(\"department_id\").agg(F.max(\"salary\").alias(\"max_salary\"))
+result=(e.join(mx,\"department_id\").filter(F.col(\"salary\")==F.col(\"max_salary\"))
+ .select(\"department_id\",\"employee_name\",\"salary\").orderBy(\"department_id\",\"employee_name\"))", "SQL73": "from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+e=spark.table(\"employees\"); w=Window.partitionBy(\"department_id\").orderBy(F.col(\"salary\").desc())
+result=(e.withColumn(\"salary_rank\",F.dense_rank().over(w)).filter(F.col(\"salary_rank\")<=2)
+ .select(\"employee_name\",\"department_id\",\"salary\",\"salary_rank\").orderBy(\"department_id\",\"salary_rank\",\"employee_name\"))", "SQL74": "from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+e=spark.table(\"employees\"); w=Window.partitionBy(\"department_id\").orderBy(F.col(\"salary\").desc())
+result=(e.withColumn(\"salary_rank\",F.dense_rank().over(w))
+ .select(\"employee_name\",\"department_id\",\"salary\",\"salary_rank\").orderBy(\"department_id\",\"salary_rank\",\"employee_name\"))", "SQL75": "from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+e=spark.table(\"employees\")
+w=Window.partitionBy(\"department_id\").orderBy(F.col(\"salary\").desc(),\"employee_id\").rowsBetween(Window.unboundedPreceding,Window.currentRow)
+result=(e.withColumn(\"running_salary\",F.sum(\"salary\").over(w))
+ .select(\"employee_name\",\"department_id\",\"salary\",\"running_salary\")
+ .orderBy(\"department_id\",F.col(\"salary\").desc(),\"employee_id\"))", "SQL76": "from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+d=spark.table(\"employee_scd2\"); w=Window.partitionBy(\"employee_id\").orderBy(\"effective_from\")
+result=(d.withColumn(\"previous_salary\",F.lag(\"salary\").over(w))
+ .select(\"employee_id\",\"effective_from\",\"salary\",\"previous_salary\").orderBy(\"employee_id\",\"effective_from\"))", "SQL77": "from pyspark.sql import functions as F
+result=(spark.table(\"employee_scd2\").filter(F.col(\"is_current\")==1)
+ .select(\"employee_id\",\"department_id\",\"job_title\",\"salary\",\"effective_from\",\"effective_to\").orderBy(\"employee_id\"))", "SQL78": "from pyspark.sql import functions as F
+result=(spark.table(\"employee_scd2\").groupBy(\"employee_id\")
+ .agg(F.count(\"*\").alias(\"version_count\")).filter(F.col(\"version_count\")>1).orderBy(\"employee_id\"))", "SQL79": "from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+d=spark.table(\"employee_scd2\"); w=Window.partitionBy(\"employee_id\").orderBy(\"effective_from\")
+result=(d.withColumn(\"salary_change\",F.col(\"salary\")-F.lag(\"salary\").over(w))
+ .select(\"employee_id\",\"effective_from\",\"salary\",\"salary_change\").orderBy(\"employee_id\",\"effective_from\"))", "SQL80": "from pyspark.sql import functions as F
+result=(spark.table(\"employee_sales_history\").filter(F.col(\"is_current\")==1)
+ .select(\"employee_id\",\"sales_target\",\"region\").orderBy(\"employee_id\"))", "SQL81": "from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+d=spark.table(\"employee_sales_history\"); w=Window.partitionBy(\"employee_id\").orderBy(\"effective_from\")
+result=(d.withColumn(\"previous_target\",F.lag(\"sales_target\").over(w))
+ .select(\"employee_id\",\"effective_from\",\"sales_target\",\"previous_target\").orderBy(\"employee_id\",\"effective_from\"))", "SQL82": "from pyspark.sql import functions as F
+result=(spark.table(\"duplicate_customers\").groupBy(\"email\")
+ .agg(F.count(\"*\").alias(\"duplicate_count\")).filter(F.col(\"duplicate_count\")>1)
+ .orderBy(F.col(\"duplicate_count\").desc(),\"email\"))", "SQL83": "from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+d=spark.table(\"duplicate_customers\"); w=Window.partitionBy(\"email\").orderBy(F.col(\"created_at\").desc(),F.col(\"record_id\").desc())
+result=(d.withColumn(\"rn\",F.row_number().over(w)).filter(F.col(\"rn\")==1)
+ .select(\"record_id\",\"customer_name\",\"email\",\"created_at\").orderBy(\"email\"))", "SQL84": "from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+d=spark.table(\"duplicate_customers\"); w=Window.partitionBy(\"email\").orderBy(\"created_at\",\"record_id\")
+result=(d.withColumn(\"rn\",F.row_number().over(w)).filter(F.col(\"rn\")==1)
+ .select(\"record_id\",\"customer_name\",\"email\",\"created_at\").orderBy(\"email\"))", "SQL85": "from pyspark.sql import functions as F
+result=(spark.table(\"customers\").groupBy(\"city\").agg(F.count(\"*\").alias(\"customer_count\"))
+ .orderBy(F.col(\"customer_count\").desc(),\"city\"))", "SQL86": "from pyspark.sql import functions as F
+result=(spark.table(\"customers\").groupBy(\"segment\").agg(F.count(\"*\").alias(\"customer_count\"))
+ .orderBy(F.col(\"customer_count\").desc(),\"segment\"))", "SQL87": "from pyspark.sql import functions as F
+result=(spark.table(\"customers\").groupBy(\"city\").agg(F.max(\"signup_date\").alias(\"latest_signup_date\"))
+ .orderBy(\"city\"))", "SQL88": "from pyspark.sql import functions as F
+result=(spark.table(\"orders\").groupBy(\"status\").agg(F.count(\"*\").alias(\"order_count\"))
+ .orderBy(F.col(\"order_count\").desc(),\"status\"))", "SQL89": "from pyspark.sql import functions as F
+result=(spark.table(\"orders\").groupBy(\"status\").agg(F.round(F.sum(\"total_amount\"),2).alias(\"total_amount\"))
+ .orderBy(F.col(\"total_amount\").desc(),\"status\"))", "SQL90": "from pyspark.sql import functions as F
+result=(spark.table(\"orders\").withColumn(\"year_month\",F.date_format(\"order_date\",\"yyyy-MM\"))
+ .groupBy(\"year_month\").agg(F.round(F.sum(\"total_amount\"),2).alias(\"revenue\"))
+ .orderBy(\"year_month\"))", "SQL91": "from pyspark.sql import functions as F
+result=(spark.table(\"orders\").filter(F.col(\"order_date\").between(\"2024-01-01\",\"2024-12-31\"))
+ .select(\"order_id\",\"customer_id\",\"order_date\",\"total_amount\").orderBy(\"order_date\",\"order_id\"))", "SQL92": "from pyspark.sql import functions as F
+result=(spark.table(\"date_calendar\").filter(F.col(\"is_weekend\")==1)
+ .select(\"full_date\",\"day_name\").orderBy(\"full_date\"))", "SQL93": "from pyspark.sql import functions as F
+result=(spark.table(\"date_calendar\").groupBy(\"year\",\"quarter\")
+ .agg(F.count(\"*\").alias(\"day_count\")).orderBy(\"year\",\"quarter\"))", "SQL94": "from pyspark.sql import functions as F
+result=(spark.table(\"visits\").groupBy(\"patient_id\").agg(F.count(\"*\").alias(\"visit_count\"))
+ .orderBy(F.col(\"visit_count\").desc(),\"patient_id\"))", "SQL95": "from pyspark.sql import functions as F
+result=(spark.table(\"visits\").groupBy(\"patient_id\")
+ .agg(F.round(F.sum(\"amount\"),2).alias(\"total_amount\"))
+ .orderBy(F.col(\"total_amount\").desc(),\"patient_id\"))", "SQL96": "from pyspark.sql import functions as F
+result=(spark.table(\"sales\").groupBy(\"employee_id\")
+ .agg(F.round(F.sum(\"net_amount\"),2).alias(\"total_net_sales\"))
+ .orderBy(F.col(\"total_net_sales\").desc(),\"employee_id\"))", "SQL97": "from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+v=spark.table(\"visits\"); w=Window.partitionBy(\"patient_id\").orderBy(F.col(\"visit_date\").desc(),F.col(\"visit_id\").desc())
+result=(v.withColumn(\"rn\",F.row_number().over(w)).filter(F.col(\"rn\")==1)
+ .select(\"patient_id\",\"visit_date\",\"doctor\").orderBy(\"patient_id\"))", "SQL98": "from pyspark.sql import functions as F
+result=(spark.table(\"admissions\").withColumn(\"length_of_stay\",F.datediff(\"discharge_date\",\"admission_date\"))
+ .select(\"admission_id\",\"patient_id\",\"length_of_stay\").orderBy(\"admission_id\"))", "SQL99": "from pyspark.sql import functions as F
+result=(spark.table(\"admissions\").groupBy(\"diagnosis\").agg(F.count(\"*\").alias(\"admission_count\"))
+ .orderBy(F.col(\"admission_count\").desc(),\"diagnosis\"))", "SQL100": "from pyspark.sql import functions as F
+result=(spark.table(\"admissions\").groupBy(\"patient_id\").agg(F.count(\"*\").alias(\"admission_count\"))
+ .filter(F.col(\"admission_count\")>1).orderBy(F.col(\"admission_count\").desc(),\"patient_id\"))"};
+  return solutions[q.id] || "PySpark solution is not available yet for this question.";
+}
 function loadQ(i){
   current=(i+questions.length)%questions.length;
   let q=questions[current];
@@ -194,9 +564,11 @@ function loadQ(i){
 
   $('hint').textContent=q.hint;
   $('solutionText').textContent=q.sql;
+  $('pySolutionText').textContent=pySparkSolution(q);
   $('hint').classList.add('hide');
   $('expected').classList.add('hide');
   $('solution').classList.add('hide');
+  $('pysolution').classList.add('hide');
 
   let h='<table><tr>'+q.columns.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr>';
   q.expected.forEach(r=>h+='<tr>'+r.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>');

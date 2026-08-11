@@ -293,11 +293,14 @@ function changeDifficulty(){
   const f=$('filter').value;
   const list=filteredQuestions();
   if(!list.length){
-    $('title').textContent='No questions found';$('prompt').textContent='There are no questions for this difficulty.';return;
+    $('title').textContent='No questions found';
+    $('prompt').textContent='There are no questions for this difficulty.';
+    return;
   }
-  const currentId=questions[current]?.id;
-  const idx=list.findIndex(q=>q.id===currentId);
-  current=questions.indexOf(list[idx>=0?idx:0]);
+  // Always open the first question of the selected difficulty.
+  // Previous/Next continue to use filteredQuestions(), so navigation
+  // remains inside the selected difficulty.
+  current=questions.indexOf(list[0]);
   renderQuestion();
 }
 function filteredQuestions(){

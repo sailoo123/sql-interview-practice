@@ -1,504 +1,349 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Learn SQL - Online SQL Terminal</title>
-<script src="https://cdn.jsdelivr.net/npm/sql.js@1.13.0/dist/sql-wasm.js"></script>
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Learn SQL - Offline SQL Terminal</title>
 <style>
-*{box-sizing:border-box}
-html,body{height:100%;margin:0}
-body{font:14px Arial,Helvetica,sans-serif;color:#222;background:#f7f8fa;overflow:hidden}
-button,input,select,textarea{font:inherit}
-button{cursor:pointer}
-.top{height:58px;background:#fff;border-bottom:1px solid #d7dce2;display:flex;align-items:center;padding:0 10px;gap:10px;min-width:0;position:sticky;top:0;z-index:1000}
-.brand{font-size:18px;font-weight:600;white-space:nowrap}
-.online-pill{background:#eefaf0;color:#176b34;border:1px solid #b8dfc0;border-radius:14px;padding:4px 9px;font-size:11px;white-space:nowrap}
-.top-nav{margin-left:auto;display:flex;align-items:center;gap:4px;min-width:0}
-.top-btn{border:0;background:#fff;color:#374151;padding:7px 9px;border-radius:7px;white-space:nowrap}
-.top-btn:hover{background:#f1f5f9}
-.status{font-size:12px}
-.layout{display:grid;grid-template-columns:300px minmax(0,1fr) 300px;height:calc(100vh - 58px);min-width:0}
-.layout.left-collapsed{grid-template-columns:34px minmax(0,1fr) 300px}
-.layout.right-collapsed{grid-template-columns:300px minmax(0,1fr) 34px}
-.layout.left-collapsed.right-collapsed{grid-template-columns:34px minmax(0,1fr) 34px}
-.left,.right{position:relative;min-width:0;overflow:auto;background:#fff}
-.left{border-right:1px solid #d7dce2}
-.right{border-left:1px solid #d7dce2;padding:12px}
-.center{min-width:0;overflow:auto;padding:14px 20px;background:#f7f8fa}
-.panel-collapse{position:sticky;top:0;z-index:20;width:32px;height:42px;border:0;border-bottom:1px solid #d7dce2;background:#f7f8fa;color:#334155;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.panel-collapse:hover{background:#eaf1f7}
-.left.panel-is-collapsed,.right.panel-is-collapsed{overflow:hidden;background:#f7f8fa;padding:0}
-.left.panel-is-collapsed>*:not(.panel-collapse),.right.panel-is-collapsed>*:not(.panel-collapse){display:none!important}
-.left.panel-is-collapsed .panel-collapse,.right.panel-is-collapsed .panel-collapse{display:flex!important;margin:0}
-.left.panel-is-collapsed .panel-collapse{width:33px}
-.right.panel-is-collapsed .panel-collapse{width:33px}
-.left h3{margin:18px 10px 10px;font-size:16px}
-.db{margin:12px 0;border:1px solid #d7dce2;border-left:0;border-right:0}
-.dbhead{display:flex;align-items:center;gap:7px;background:#f5f6f7;padding:10px;cursor:pointer;user-select:none;font-weight:600}
-.dbhead:hover{background:#edf3f8}
-.db-toggle{display:inline-block;width:14px;color:#536273;font-size:12px}
-.db-meta{margin-left:auto;color:#6b7280;font-size:10px;font-weight:400}
-.db-content.hide{display:none}
-.search{margin:0 10px;width:calc(100% - 20px);padding:9px;border:1px solid #cbd1d8;border-radius:4px}
-.db-search-wrap{padding:10px 0}
-.catalog-table{padding:10px 12px;border-top:1px solid #edf0f2;cursor:pointer;display:flex;align-items:center;gap:8px}
-.catalog-table:hover{background:#eef6ff}
-.catalog-icon{width:18px;height:18px;border:1px solid #9aa7b5;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#54708c;flex:0 0 auto}
-.catalog-name{font-weight:600}
-.catalog-cols{margin-left:auto;color:#6b7280;font-size:10px}
-.catalog-sub{padding:0 12px 9px 38px;color:#7a8490;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.table-detail{border-top:1px solid #e5e7eb;background:#fbfcfd;padding:9px}
-.table-detail-title{font-weight:700;font-size:12px;margin-bottom:7px}
-.mini-action{border:1px solid #cbd5e1;background:#fff;border-radius:4px;padding:5px 8px;font-size:11px}
-.mini-action:hover{background:#f4f7fa}
-.question{max-width:1100px;margin:0 auto;background:#fff;border:1px solid #d7dce2;border-radius:6px;padding:16px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
-.qbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-.qbar .label{font-size:17px}
-.select,.nav-btn{padding:7px 10px;border:1px solid #cbd1d8;background:#fff;border-radius:4px}
-.nav-btn{margin-left:0}
-.nav-btn.prev{margin-left:auto}
-.nav-btn:hover,.mini-action:hover{background:#f5f7fa}
-.title{font-size:20px;margin:0 0 12px;font-weight:500;line-height:1.25}
-.tag{display:inline-block;padding:3px 7px;border:1px solid #d9dee4;border-radius:10px;background:#f4f6f8;font-size:11px;margin-right:5px}
-.prompt{line-height:1.45;font-size:15px;margin:12px 0}
-.toggle{color:#0b65a3;cursor:pointer;margin-right:14px;font-size:12px;display:inline-block;margin-top:12px}
-.toggle:hover{text-decoration:underline}
-.required-section{margin-top:7px}
-.required-table-list{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
-.required-table-btn{border:1px solid #cbd5e1;background:#f8fafc;border-radius:16px;padding:6px 10px;cursor:pointer;font-size:12px;color:#1f4f8a}
-.required-table-btn:hover{background:#eef6ff}
-.required-table-btn.active{background:#e8f2ff;border-color:#8db8ea;font-weight:700}
-.req-detail{margin-top:10px}
-.req-schema-card{border:1px solid #d7dce2;border-radius:5px;background:#fff;padding:10px}
-.req-schema-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
-.view-data-btn{border:1px solid #cbd5e1;background:#fff;border-radius:4px;padding:5px 9px;cursor:pointer;font-size:12px}
-.view-data-btn:hover{background:#f5f7fa}
-.req-data{margin-top:10px;max-height:280px;overflow:auto;border-top:1px solid #e5e7eb;padding-top:8px}
-.hint{background:#fffbea;border:1px solid #f0d88a;padding:9px;margin-top:9px;border-radius:4px;font-size:12px;line-height:1.4}
-.solution{background:#17202b;color:#e8edf2;padding:10px;border-radius:4px;font:12px Consolas,monospace;white-space:pre-wrap;margin-top:8px;overflow:auto}
-.preview{margin-top:10px;border:1px solid #d7dce2;max-height:300px;overflow:auto;background:#fff}
-.hide{display:none!important}
-table{border-collapse:collapse;width:100%;font-size:12px}
-th,td{padding:7px 9px;border-bottom:1px solid #e5e7eb;text-align:left;white-space:nowrap}
-th{background:#f4f5f6;position:sticky;top:0;z-index:1}
-.editor-wrap{margin:12px auto 0;max-width:1100px;background:#fff;border:1px solid #d7dce2}
-.tabs{border-bottom:1px solid #d7dce2;padding:0 12px;display:flex;align-items:center}
-.tab{display:inline-block;padding:9px 4px;color:#1268a0;border-bottom:2px solid #1268a0}
-.clear-control{border:0;background:transparent;cursor:pointer;padding:9px 4px;margin-left:14px;color:#1268a0}
-textarea{width:100%;height:230px;background:#18212c;color:#e6edf3;border:0;padding:13px;font:14px Consolas,monospace;resize:vertical;outline:none;display:block}
-.buttons{padding:10px;display:flex;gap:7px;flex-wrap:wrap}
-button{padding:7px 11px;border:1px solid #cbd1d8;background:#fff;border-radius:4px}
-.run{background:#16803a;color:#fff;border-color:#16803a}
-.run:hover{background:#126b31}
-.status{padding:0 10px 8px;font-size:12px}
-.success{color:#16803a}.error{color:#b42318}
-.resultbox{margin:12px auto 0;max-width:1100px;background:#fff;border:1px solid #d7dce2}
-.resulthead{padding:10px;font-weight:600;border-bottom:1px solid #d7dce2}
-.result{max-height:380px;overflow:auto}
-.sidecard{border:1px solid #d7dce2;margin-bottom:12px;border-radius:6px;overflow:hidden;background:#fff}
-.sidehead{padding:9px 10px;background:#f4f5f6;font-weight:600}
-.progress{padding:12px}.barbg{height:7px;background:#e8ebee;border-radius:8px;margin-top:8px}.bar{height:7px;background:#16803a;width:0;border-radius:8px}
-.sidehead-btn{width:100%;border:0;text-align:left;cursor:pointer;font:inherit;color:inherit}.sidehead-btn:hover{background:#eef3f7}
-.qitem{padding:9px 10px;border-top:1px solid #eee;font-size:12px;cursor:pointer;line-height:1.35}.qitem:hover{background:#f0f4f8}.qitem.active{background:#e8f2fb;border-left:3px solid #1670b8;font-weight:600}.diff{float:right;color:#6b7280;font-size:10px}
-.errorguide{margin:10px 0;padding:12px;border:1px solid #e3b4b4;background:#fff7f7;border-radius:4px;font-size:13px;line-height:1.5}.errorguide .errtitle{font-weight:700;color:#b42318;margin-bottom:6px}.errorguide code{background:#f0f1f3;padding:2px 5px;border-radius:3px;font-family:Consolas,monospace}
+*{box-sizing:border-box}body{margin:0;font:14px Arial,Helvetica,sans-serif;color:#222;background:#fff}.top{height:58px;border-bottom:1px solid #d7dce2;display:flex;align-items:center;padding:0 10px;background:#fff}.brand{font-size:18px;font-weight:600}.offline{margin-left:9px;background:#edf8ef;color:#24733b;border:1px solid #cde5d2;border-radius:14px;padding:4px 9px;font-size:11px}.links{margin-left:auto;display:flex;gap:20px;color:#555;font-size:13px}
+.layout{display:grid;grid-template-columns:335px 1fr 330px;height:calc(100vh - 58px)}.left{border-right:1px solid #d7dce2;overflow:auto}.center{padding:14px 20px;overflow:auto;background:#fafafa}.right{border-left:1px solid #d7dce2;overflow:auto;background:#fff;padding:12px}
+.left h3{margin:18px 10px 10px;font-size:16px}.search{margin:0 10px;width:calc(100% - 20px);padding:9px;border:1px solid #cbd1d8;border-radius:4px}.db{margin:12px 0;border:1px solid #d7dce2;border-left:0;border-right:0}.dbhead{background:#f5f6f7;padding:10px;font-weight:600}.table{padding:8px 12px;cursor:pointer;border-top:1px solid #eee;font-size:13px}.table:hover{background:#edf4fb}.resource{padding:8px 11px;cursor:pointer;color:#222}.resource:hover{background:#f3f6f8}
+.question{background:#fff;border:1px solid #d7dce2;border-radius:4px;padding:16px}.qbar{display:flex;align-items:center;margin-bottom:14px}.qbar .label{font-size:17px}.select,.next{padding:7px 10px;border:1px solid #cbd1d8;background:#fff;border-radius:4px;margin-left:10px}.next{margin-left:auto;cursor:pointer}.title{font-size:18px;margin:0 0 12px;font-weight:500}.tag{display:inline-block;padding:3px 7px;border:1px solid #d9dee4;border-radius:10px;background:#f4f6f8;font-size:11px;margin-right:5px}.required{font-weight:600;margin-top:16px}.schema{margin-top:8px;border:1px solid #d9dee4;max-height:250px;overflow:auto}table{border-collapse:collapse;width:100%;font-size:12px}th,td{padding:7px 9px;border-bottom:1px solid #e5e7eb;text-align:left;white-space:nowrap}th{background:#f4f5f6;position:sticky;top:0}.toggle{color:#0b65a3;cursor:pointer;margin-right:13px;font-size:12px;display:inline-block;margin-top:12px}.hint{background:#fffbea;border:1px solid #f0d88a;padding:9px;margin-top:9px;border-radius:4px;font-size:12px;line-height:1.4}.solution{background:#17202b;color:#e8edf2;padding:10px;border-radius:4px;font:12px Consolas,monospace;white-space:pre-wrap;margin-top:8px;overflow:auto}.hide{display:none}
+.editor-wrap{margin-top:12px;background:#fff;border:1px solid #d7dce2}.tabs{border-bottom:1px solid #d7dce2;padding:0 12px}.tab{display:inline-block;padding:9px 4px;color:#1268a0;border-bottom:2px solid #1268a0}textarea{width:100%;height:215px;background:#18212c;color:#e6edf3;border:0;padding:13px;font:14px Consolas,monospace;resize:vertical;outline:none}.buttons{padding:10px;display:flex;gap:7px}button{padding:7px 11px;border:1px solid #cbd1d8;background:#fff;border-radius:4px;cursor:pointer}.run{background:#16803a;color:#fff;border-color:#16803a}.status{padding:0 10px 8px;font-size:12px}.success{color:#16803a}.error{color:#b42318}.resultbox{margin-top:12px;background:#fff;border:1px solid #d7dce2}.resulthead{padding:10px;font-weight:600;border-bottom:1px solid #d7dce2}.result{max-height:350px;overflow:auto}
+.sidecard{border:1px solid #d7dce2;margin-bottom:12px}.sidehead{padding:9px 10px;background:#f4f5f6;font-weight:600}.progress{padding:12px}.barbg{height:7px;background:#e8ebee;border-radius:8px;margin-top:8px}.bar{height:7px;background:#16803a;width:0;border-radius:8px}.qitem{padding:8px;border-top:1px solid #eee;font-size:12px;cursor:pointer}.qitem:hover{background:#f0f4f8}.qitem.active{background:#e8f2fb;border-left:3px solid #1670b8}.diff{float:right;color:#6b7280;font-size:10px}.preview{margin-top:10px;border:1px solid #d7dce2;max-height:300px;overflow:auto}
+@media(max-width:1050px){.layout{grid-template-columns:240px 1fr}.right{display:none}}@media(max-width:700px){.layout{display:block}.left{display:none}.center{padding:8px}}
+
+.errorguide{margin:10px 0;padding:12px;border:1px solid #e3b4b4;background:#fff7f7;border-radius:4px;font-size:13px;line-height:1.5}
+.errorguide .errtitle{font-weight:700;color:#b42318;margin-bottom:6px}
+.errorguide .hinttitle{font-weight:700;color:#7a4e00;margin-top:8px}
+.errorguide code{background:#f0f1f3;padding:2px 5px;border-radius:3px;font-family:Consolas,monospace}
 .successguide{margin:10px 0;padding:11px;border:1px solid #b7dfc3;background:#f3fbf5;border-radius:4px;color:#176b34;font-size:13px}
-.success-popup{position:fixed;top:18px;right:22px;z-index:9999;min-width:300px;max-width:430px;padding:14px 18px;background:#b7ffb7;border:1px solid #67c767;color:#176b2c;border-radius:5px;box-shadow:0 4px 14px rgba(0,0,0,.18);font-size:15px;font-weight:600}
-.success-popup .popup-title{font-size:16px;margin-bottom:3px}.success-popup .popup-sub{font-weight:400;font-size:13px}
-.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.42);z-index:5000;display:flex;align-items:center;justify-content:center;padding:18px}
-.modal{width:min(1000px,96vw);max-height:90vh;overflow:auto;background:#fff;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.25);border:1px solid #d7dce2}
-.modal-head{position:sticky;top:0;z-index:2;background:#fff;border-bottom:1px solid #e5e7eb;padding:14px 16px;display:flex;align-items:center;gap:10px}.modal-title{font-size:17px;font-weight:700}.modal-close{margin-left:auto;border:0;font-size:20px;padding:2px 8px}.modal-body{padding:16px}
-.question-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.allq{border:1px solid #e0e5ea;border-radius:7px;padding:10px;cursor:pointer}.allq:hover{background:#f5f9fc;border-color:#b7c8d8}.allq strong{font-size:12px}.allq div{font-size:11px;margin-top:3px;color:#4b5563}
-.setting-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid #eef0f2}.setting-row:last-child{border-bottom:0}.setting-label{font-weight:600}.setting-desc{font-size:12px;color:#6b7280;margin-top:3px}
-@media(max-width:1050px){.layout{grid-template-columns:250px minmax(0,1fr) 280px}.layout.left-collapsed{grid-template-columns:34px minmax(0,1fr) 280px}.layout.right-collapsed{grid-template-columns:250px minmax(0,1fr) 34px}.layout.left-collapsed.right-collapsed{grid-template-columns:34px minmax(0,1fr) 34px}}
-@media(max-width:700px){body{overflow:auto}.top{height:auto;min-height:58px;padding:8px 10px;flex-wrap:wrap}.brand{font-size:16px;flex:1}.top-nav{order:3;width:100%;overflow-x:auto}.layout{display:block;height:auto}.left,.right{display:none}.center{padding:8px;overflow:visible}.question{padding:12px}.qbar .nav-btn.prev{margin-left:auto}.title{font-size:19px}.question-grid{grid-template-columns:1fr}.modal-backdrop{padding:8px}.modal{width:100%;max-height:94vh}.success-popup{left:10px;right:10px;top:10px;min-width:0}}
-</style>
-</head>
-<body>
-<header class="top">
-  <div class="brand">Learn SQL - Online SQL Terminal</div>
-  <span class="online-pill">ONLINE</span>
-  <div class="top-nav">
-    <button class="top-btn status" id="onlineStatus">● Connecting...</button>
-    <button class="top-btn" onclick="openDatabaseModal()">Database</button>
-    <button class="top-btn" onclick="openSettings()">Settings</button>
-    <button class="top-btn" onclick="openAllQuestions()">View All Questions</button>
-  </div>
-</header>
 
-<div class="layout" id="layout">
-  <aside class="left" id="leftPanel">
-    <button class="panel-collapse" id="leftCollapseBtn" type="button" onclick="toggleLeftPanel()" title="Hide database panel">‹</button>
-    <h3>SQL Database</h3>
-    <div class="db">
-      <div class="dbhead" onclick="toggleDatabaseCatalog()">
-        <span id="dbArrow" class="db-toggle">▸</span><b>practice.db</b>
-        <span class="db-meta" id="dbmeta">0 tables</span><span style="color:#16803a">●</span>
-      </div>
-      <div id="dbContent" class="db-content hide">
-        <div class="db-search-wrap"><input id="search" class="search" placeholder="Search datasets / tables..." oninput="renderTables()"></div>
-        <div id="tables"></div>
-      </div>
-    </div>
-  </aside>
+.success-popup{
+  position:fixed;
+  top:18px;
+  right:22px;
+  z-index:9999;
+  min-width:300px;
+  max-width:430px;
+  padding:14px 18px;
+  background:#b7ffb7;
+  border:1px solid #67c767;
+  color:#176b2c;
+  border-radius:5px;
+  box-shadow:0 4px 14px rgba(0,0,0,.18);
+  font-size:15px;
+  font-weight:600;
+  animation:successIn .2s ease-out;
+}
+.success-popup .popup-title{font-size:16px;margin-bottom:3px}
+.success-popup .popup-sub{font-weight:400;font-size:13px}
+@keyframes successIn{
+  from{opacity:0;transform:translateY(-8px)}
+  to{opacity:1;transform:translateY(0)}
+}
 
-  <main class="center">
-    <section class="question">
-      <div class="qbar">
-        <span class="label">Question</span>
-        <select id="filter" class="select" onchange="changeDifficulty()">
-          <option value="All">All</option><option value="Easy">Easy</option><option value="Medium">Medium</option><option value="Hard">Hard</option>
-        </select>
-        <button class="nav-btn prev" onclick="prevQ()">‹ Previous Question</button>
-        <button class="nav-btn" onclick="nextQ()">Next Question ›</button>
-      </div>
-      <h2 id="title" class="title"></h2>
-      <div id="tags"></div>
-      <p id="prompt" class="prompt"></p>
 
-      <div><span id="requiredToggle" class="toggle" onclick="toggleRequired()">▸ Show Required Tables</span></div>
-      <div id="requiredSection" class="required-section hide">
-        <div style="font-weight:600;margin-top:8px">Required tables</div>
-        <div id="req" class="required-table-list"></div>
-        <div id="schema" class="req-detail"></div>
-      </div>
+.hide{display:none!important;}
+@media (max-width:799px){
+  #online-status{font-size:11px!important;}
+}
+.connection-pill{
+  display:inline-block;
+  padding:4px 9px;
+  border-radius:12px;
+  font-size:11px;
+  border:1px solid #b8dfc0;
+  background:#eefaf0;
+  color:#176b34;
+}
+.connection-pill.offline{
+  border-color:#efb1b1;
+  background:#fff0f0;
+  color:#b42318;
+}
 
-      <div>
-        <span class="toggle" onclick="toggleBlock('hint')">💡 Show Hint</span>
-        <span class="toggle" onclick="toggleBlock('expected')">▸ Show Expected Output</span>
-        <span class="toggle" onclick="toggleBlock('solution')">▸ Show Solution</span>
-      </div>
-      <div id="hint" class="hint hide"></div>
-      <div id="expected" class="hide" style="margin-top:10px"><b style="font-size:12px">Expected Output</b><div id="expectedTable" class="preview"></div></div>
-      <div id="solution" class="hide"><b style="font-size:12px">Solution</b><div id="solutionText" class="solution"></div></div>
-    </section>
-
-    <div style="font-size:12px;color:#555;margin:10px auto;max-width:1100px">Connected to a browser-based SQLite database. Type your SQL below and click <b>Run</b>. The checker validates only the result returned by your SQL.</div>
-
-    <section class="editor-wrap">
-      <div class="tabs"><span class="tab">SQL Query</span><button id="clearTopBtn" class="clear-control" type="button" onclick="clearQuery()">Clear</button></div>
-      <textarea id="editor" spellcheck="false" placeholder="Write your SQL query here..."></textarea>
-      <div class="buttons">
-        <button class="run" onclick="runQuery()">▶ Run</button>
-        <button onclick="formatSQL()">Format SQL</button>
-        <button onclick="clearQuery()">Clear</button>
-        <button onclick="resetDatabase()">Reset Database</button>
-      </div>
-      <div id="status" class="status"></div>
-    </section>
-
-    <section class="resultbox">
-      <div class="resulthead">Query Result</div>
-      <div id="result" class="result"><div style="padding:12px;color:#6b7280">Write your query and click Run.</div></div>
-    </section>
-  </main>
-
-  <aside class="right" id="rightPanel">
-    <button class="panel-collapse" id="rightCollapseBtn" type="button" onclick="toggleRightPanel()" title="Hide question bank">›</button>
-    <div class="sidecard">
-      <div class="sidehead">Progress</div>
-      <div class="progress"><span id="prog">0 / 0 solved</span><div class="barbg"><div id="bar" class="bar"></div></div></div>
-    </div>
-    <div class="sidecard">
-      <button id="qbankToggle" class="sidehead sidehead-btn" type="button" onclick="toggleQuestionBank()">▸ Question Bank <span id="count" style="float:right;color:#6b7280"></span></button>
-      <div id="qbank" class="hide"></div>
-    </div>
-  </aside>
+/* Clean responsive UI */
+.top{position:sticky;top:0;z-index:1000;min-width:0;gap:10px}.brand{white-space:nowrap}.top-nav{margin-left:auto;display:flex;align-items:center;gap:6px;min-width:0}.top-btn{border:0;background:#fff;color:#374151;padding:7px 9px;border-radius:7px;font-size:13px;white-space:nowrap}.top-btn:hover{background:#f3f6f9}.layout{grid-template-columns:300px minmax(0,1fr) 300px}.left{background:#fbfcfd}.dbhead{display:flex;align-items:center;gap:7px}.db-meta{margin-left:auto;color:#6b7280;font-size:10px;font-weight:400}.catalog-table{padding:10px 12px;border-top:1px solid #edf0f2;cursor:pointer;display:flex;align-items:center;gap:8px}.catalog-table:hover{background:#eef6ff}.catalog-icon{width:18px;height:18px;border:1px solid #9aa7b5;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#54708c}.catalog-name{font-weight:600}.catalog-cols{margin-left:auto;color:#6b7280;font-size:10px}.catalog-sub{padding:0 12px 9px 38px;color:#7a8490;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.question{max-width:1100px;margin:0 auto}.qbar{gap:8px;flex-wrap:wrap}.select{margin-left:0}.next{margin-left:auto}.center{min-width:0}.editor-wrap,.resultbox{max-width:1100px;margin-left:auto;margin-right:auto}.question{box-shadow:0 1px 2px rgba(0,0,0,.03)}.sidecard{border-radius:6px;overflow:hidden}.qitem{padding:9px 10px;line-height:1.35}.qitem.active{font-weight:600}.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.42);z-index:5000;display:flex;align-items:center;justify-content:center;padding:18px}.modal{width:min(1000px,96vw);max-height:90vh;overflow:auto;background:#fff;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.25);border:1px solid #d7dce2}.modal-head{position:sticky;top:0;z-index:2;background:#fff;border-bottom:1px solid #e5e7eb;padding:14px 16px;display:flex;align-items:center;gap:10px}.modal-title{font-size:17px;font-weight:700}.modal-close{margin-left:auto;border:0;font-size:20px;padding:2px 8px}.modal-body{padding:16px}.dataset-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}.dataset-chip{padding:6px 9px;border:1px solid #d7dce2;background:#fff;border-radius:14px;font-size:11px;cursor:pointer}.dataset-chip.active{background:#eaf4ff;border-color:#8fbce3;color:#0b65a3;font-weight:600}.catalog-detail{border:1px solid #d7dce2;border-radius:7px;overflow:hidden}.catalog-detail-head{padding:11px 12px;background:#f7f8fa;font-weight:700}.catalog-preview{max-height:340px;overflow:auto}.question-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.allq{border:1px solid #e0e5ea;border-radius:7px;padding:10px;cursor:pointer}.allq:hover{background:#f5f9fc;border-color:#b7c8d8}.allq strong{font-size:12px}.allq div{font-size:11px;margin-top:3px;color:#4b5563}.setting-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid #eef0f2}.setting-row:last-child{border-bottom:0}.setting-label{font-weight:600}.setting-desc{font-size:12px;color:#6b7280;margin-top:3px}
+@media(max-width:1050px){.layout{grid-template-columns:250px minmax(0,1fr)}.right{display:none}}
+@media(max-width:700px){body{font-size:14px}.top{height:auto;min-height:58px;padding:8px 10px;align-items:center;flex-wrap:wrap}.brand{font-size:16px;flex:1 1 auto}.top-nav{order:3;width:100%;overflow-x:auto;justify-content:flex-start;padding-top:2px}.top-btn{flex:0 0 auto;background:#f7f8fa}.layout{display:block;height:auto}.left{display:none}.center{padding:8px;background:#f7f8fa;overflow:visible}.question{padding:12px}.next{margin-left:auto;padding:8px 10px}.title{font-size:19px;line-height:1.25}.editor-wrap textarea{height:220px}.buttons{flex-wrap:wrap}.buttons button{flex:1 1 auto}.question-grid{grid-template-columns:1fr}.modal-backdrop{padding:8px}.modal{width:100%;max-height:94vh;border-radius:8px}.modal-body{padding:12px}.success-popup{left:10px;right:10px;top:10px;min-width:0}.result{max-width:100%;overflow:auto}.top-btn.status{font-size:11px}}
+</style><script src="https://cdn.jsdelivr.net/npm/sql.js@1.13.0/dist/sql-wasm.js"></script></head><body>
+<div class=top><div class=brand>Learn SQL - Online SQL Terminal</div><span class=offline style="background:#eefaf0;color:#176b34;border-color:#b8dfc0">ONLINE</span><div class=top-nav><button class="top-btn status" id="online-status">● Database connected</button><span id=serverStatus style="color:#16803a;font-size:11px;white-space:nowrap"></span><button class=top-btn onclick="openDatabaseModal()">Database</button><button class=top-btn onclick="openSettings()">Settings</button><button class=top-btn onclick="openAllQuestions()">View All Questions</button></div></div>
+<div class=layout>
+<aside class=left><h3>SQL Database</h3><input id=search class=search placeholder="Search datasets / tables..." oninput=renderTables()><div class=db><div class=dbhead><b>practice.db</b><span class=db-meta id=dbmeta>18 tables</span><span style="color:#16803a">●</span></div><div id=tables></div></div><h3>Learning Resources</h3><div class=resource onclick="alert('JOINs: INNER JOIN, LEFT JOIN, self join, anti join and multi-table joins.')">JOINs</div><div class=resource onclick="alert('Window Functions: ROW_NUMBER, RANK, DENSE_RANK, LAG, LEAD and running totals.')">Window Functions</div><div class=resource onclick="alert('CTEs: build multi-step transformations using WITH.')">CTEs</div><div class=resource onclick="alert('Dates & Calendar: date parts, month analysis and calendar joins.')">Dates & Calendar</div><div class=resource onclick="alert('SCD Type 2: current records, history and point-in-time lookup.')">SCD Type 2</div></aside>
+<main class=center>
+<div class=question><div class=qbar><span class=label>Question</span><select id=filter class=select onchange=renderQuestions()><option>All</option><option>Easy</option><option>Medium</option><option>Hard</option></select><button class=next onclick=nextQ()>Next Question ›</button></div><h2 id=title class=title></h2><div id=tags></div><p id=prompt></p><div><span id=requiredToggle class=toggle onclick=toggleRequired()>▸ Show Required Tables</span></div><div id=requiredSection class=hide><div class=required>Required tables</div><div id=req style="margin-top:7px"></div><div id=schema></div></div><div><span class=toggle onclick=toggle('hint')>💡 Show Hint</span><span class=toggle onclick=toggle('expected')>▸ Show Expected Output</span><span class=toggle onclick=toggle('solution')>▸ Show Solution</span></div><div id=hint class="hint hide"></div><div id=expected class="hide" style="margin-top:10px"><b style="font-size:12px">Expected Output</b><div id=expectedTable class=preview></div></div><div id=solution class="hide"><b style="font-size:12px">Solution</b><div id=solutionText class=solution></div></div></div>
+<div style="font-size:12px;color:#555;margin-top:10px">Connected to a browser-based SQLite database. Type your SQL below and click <b>Run</b>. The checker validates only the result returned by your SQL.</div><div class=editor-wrap><div class=tabs><span class=tab>SQL Query</span><span class=toggle onclick=clearEd style="margin:0 0 0 14px">Clear</span></div><textarea id=editor spellcheck=false></textarea><div class=buttons><button class=run onclick="runQuery()">▶ Run</button><button onclick=formatSQL>Format SQL</button><button onclick=clearEd>Clear</button><button onclick=resetDB>Reset Database</button></div><div id=status class=status></div></div>
+<div class=resultbox><div class=resulthead>Query Result</div><div id=result class=result><div style="padding:12px;color:#6b7280">Write your query and click Run.</div></div></div>
+</main>
+<aside class=right><div class=sidecard><div class=sidehead>Progress</div><div class=progress><span id=prog>0 / 100 solved</span><div class=barbg><div id=bar class=bar></div></div></div></div><div class=sidecard><div class=sidehead>Question Bank <span id=count style="float:right;color:#6b7280"></span></div><div id=qbank></div></div></aside>
 </div>
-
-<div id="modalRoot"></div>
-<div id="popupRoot"></div>
-
+<script src="https://cdn.jsdelivr.net/npm/sql.js@1.13.0/dist/sql-wasm.js"></script>
 <script>
+
+function handleOnline(){
+  console.log("sql-practice: online");
+  const el=document.getElementById("online-status");
+  if(el){el.textContent="● Database connected";el.classList.remove("offline");}
+}
+function handleOffline(){
+  console.log("sql-practice: offline");
+  const el=document.getElementById("online-status");
+  if(el){el.textContent="● Database offline";el.classList.add("offline");}
+}
+window.addEventListener("online",handleOnline);
+window.addEventListener("offline",handleOffline);
+
+const DATA={"tables":["admissions","customers","date_calendar","departments","duplicate_customers","employee_sales_history","employee_scd2","employees","login_history","managers","order_items","orders","patients","products","salaries","sales","transactions","visits"],"schemas":{"admissions":[{"name":"admission_id","type":"INTEGER","pk":true},{"name":"patient_id","type":"INTEGER","pk":false},{"name":"admission_date","type":"TEXT","pk":false},{"name":"discharge_date","type":"TEXT","pk":false},{"name":"diagnosis","type":"TEXT","pk":false},{"name":"department_id","type":"INTEGER","pk":false},{"name":"number_of_visits","type":"INTEGER","pk":false}],"customers":[{"name":"customer_id","type":"INTEGER","pk":true},{"name":"customer_name","type":"TEXT","pk":false},{"name":"email","type":"TEXT","pk":false},{"name":"phone","type":"TEXT","pk":false},{"name":"city","type":"TEXT","pk":false},{"name":"signup_date","type":"TEXT","pk":false},{"name":"segment","type":"TEXT","pk":false}],"date_calendar":[{"name":"date_key","type":"INTEGER","pk":true},{"name":"full_date","type":"TEXT","pk":false},{"name":"year","type":"INTEGER","pk":false},{"name":"quarter","type":"INTEGER","pk":false},{"name":"month","type":"INTEGER","pk":false},{"name":"month_name","type":"TEXT","pk":false},{"name":"week_of_year","type":"INTEGER","pk":false},{"name":"day_of_month","type":"INTEGER","pk":false},{"name":"day_name","type":"TEXT","pk":false},{"name":"is_weekend","type":"INTEGER","pk":false}],"departments":[{"name":"department_id","type":"INTEGER","pk":true},{"name":"department_name","type":"TEXT","pk":false},{"name":"location","type":"TEXT","pk":false},{"name":"budget","type":"REAL","pk":false}],"duplicate_customers":[{"name":"record_id","type":"INTEGER","pk":true},{"name":"customer_name","type":"TEXT","pk":false},{"name":"email","type":"TEXT","pk":false},{"name":"phone","type":"TEXT","pk":false},{"name":"city","type":"TEXT","pk":false},{"name":"created_at","type":"TEXT","pk":false}],"employee_sales_history":[{"name":"history_id","type":"INTEGER","pk":true},{"name":"employee_id","type":"INTEGER","pk":false},{"name":"effective_from","type":"TEXT","pk":false},{"name":"effective_to","type":"TEXT","pk":false},{"name":"sales_target","type":"REAL","pk":false},{"name":"region","type":"TEXT","pk":false},{"name":"is_current","type":"INTEGER","pk":false}],"employee_scd2":[{"name":"scd_id","type":"INTEGER","pk":true},{"name":"employee_id","type":"INTEGER","pk":false},{"name":"department_id","type":"INTEGER","pk":false},{"name":"job_title","type":"TEXT","pk":false},{"name":"salary","type":"REAL","pk":false},{"name":"effective_from","type":"TEXT","pk":false},{"name":"effective_to","type":"TEXT","pk":false},{"name":"is_current","type":"INTEGER","pk":false}],"employees":[{"name":"employee_id","type":"INTEGER","pk":true},{"name":"employee_name","type":"TEXT","pk":false},{"name":"email","type":"TEXT","pk":false},{"name":"gender","type":"TEXT","pk":false},{"name":"department_id","type":"INTEGER","pk":false},{"name":"manager_id","type":"INTEGER","pk":false},{"name":"job_title","type":"TEXT","pk":false},{"name":"hire_date","type":"TEXT","pk":false},{"name":"salary","type":"REAL","pk":false},{"name":"city","type":"TEXT","pk":false},{"name":"status","type":"TEXT","pk":false}],"login_history":[{"name":"login_id","type":"INTEGER","pk":true},{"name":"employee_id","type":"INTEGER","pk":false},{"name":"login_time","type":"TEXT","pk":false},{"name":"logout_time","type":"TEXT","pk":false},{"name":"ip_address","type":"TEXT","pk":false},{"name":"login_status","type":"TEXT","pk":false},{"name":"device","type":"TEXT","pk":false}],"managers":[{"name":"manager_id","type":"INTEGER","pk":true},{"name":"manager_name","type":"TEXT","pk":false},{"name":"department_id","type":"INTEGER","pk":false},{"name":"hire_date","type":"TEXT","pk":false},{"name":"salary","type":"REAL","pk":false}],"order_items":[{"name":"order_item_id","type":"INTEGER","pk":true},{"name":"order_id","type":"INTEGER","pk":false},{"name":"product_id","type":"INTEGER","pk":false},{"name":"quantity","type":"INTEGER","pk":false},{"name":"unit_price","type":"REAL","pk":false},{"name":"discount_pct","type":"REAL","pk":false}],"orders":[{"name":"order_id","type":"INTEGER","pk":true},{"name":"customer_id","type":"INTEGER","pk":false},{"name":"order_date","type":"TEXT","pk":false},{"name":"status","type":"TEXT","pk":false},{"name":"sales_channel","type":"TEXT","pk":false},{"name":"shipping_city","type":"TEXT","pk":false},{"name":"total_amount","type":"REAL","pk":false}],"patients":[{"name":"patient_id","type":"INTEGER","pk":true},{"name":"patient_name","type":"TEXT","pk":false},{"name":"gender","type":"TEXT","pk":false},{"name":"birth_date","type":"TEXT","pk":false},{"name":"city","type":"TEXT","pk":false}],"products":[{"name":"product_id","type":"INTEGER","pk":true},{"name":"product_name","type":"TEXT","pk":false},{"name":"category","type":"TEXT","pk":false},{"name":"price","type":"REAL","pk":false},{"name":"cost","type":"REAL","pk":false},{"name":"stock_qty","type":"INTEGER","pk":false},{"name":"supplier","type":"TEXT","pk":false}],"salaries":[{"name":"salary_id","type":"INTEGER","pk":true},{"name":"employee_id","type":"INTEGER","pk":false},{"name":"salary","type":"REAL","pk":false},{"name":"effective_from","type":"TEXT","pk":false},{"name":"effective_to","type":"TEXT","pk":false}],"sales":[{"name":"sale_id","type":"INTEGER","pk":true},{"name":"order_id","type":"INTEGER","pk":false},{"name":"employee_id","type":"INTEGER","pk":false},{"name":"sale_date","type":"TEXT","pk":false},{"name":"region","type":"TEXT","pk":false},{"name":"gross_amount","type":"REAL","pk":false},{"name":"discount_amount","type":"REAL","pk":false},{"name":"net_amount","type":"REAL","pk":false}],"transactions":[{"name":"transaction_id","type":"INTEGER","pk":true},{"name":"customer_id","type":"INTEGER","pk":false},{"name":"order_id","type":"INTEGER","pk":false},{"name":"transaction_date","type":"TEXT","pk":false},{"name":"transaction_type","type":"TEXT","pk":false},{"name":"amount","type":"REAL","pk":false},{"name":"payment_method","type":"TEXT","pk":false},{"name":"status","type":"TEXT","pk":false}],"visits":[{"name":"visit_id","type":"INTEGER","pk":true},{"name":"patient_id","type":"INTEGER","pk":false},{"name":"visit_date","type":"TEXT","pk":false},{"name":"doctor","type":"TEXT","pk":false},{"name":"visit_type","type":"TEXT","pk":false},{"name":"amount","type":"REAL","pk":false}]},"data":{"admissions":{"columns":["admission_id","patient_id","admission_date","discharge_date","diagnosis","department_id","number_of_visits"],"rows":[[1,120,"2024-01-02","2024-01-05","Flu",1,3],[2,121,"2024-01-05","2024-01-09","Diabetes",2,4],[3,122,"2024-02-10","2024-02-11","Fever",1,1],[4,123,"2024-02-12","2024-02-17","Asthma",1,5],[5,124,"2024-03-01","2024-03-03","Fracture",5,2],[6,125,"2024-03-10","2024-03-12","Migraine",3,2],[7,120,"2024-04-15","2024-04-20","Flu",1,4],[8,121,"2024-05-01","2024-05-03","Fever",2,2]]},"customers":{"columns":["customer_id","customer_name","email","phone","city","signup_date","segment"],"rows":[[1,"Amit Sharma","amit@gmail.com","900000001","Hyderabad","2023-01-10","Retail"],[2,"Bhavna Rao","bhavna@gmail.com","900000002","Bangalore","2023-02-18","Retail"],[3,"Chandra Kumar","chandra@gmail.com","900000003","Mumbai","2023-03-12","Corporate"],[4,"Deepa Singh","deepa@gmail.com","900000004","Hyderabad","2023-04-25","Retail"],[5,"Esha Patel","esha@gmail.com","900000005","Pune","2023-05-08","Corporate"],[6,"Farhan Ali","farhan@gmail.com","900000006","Chennai","2023-06-17","Retail"],[7,"Geeta Rao","geeta@gmail.com","900000007","Hyderabad","2024-01-05","Corporate"],[8,"Hari Kumar","hari@gmail.com","900000008","Bangalore","2024-02-20","Retail"],[9,"Isha Das","isha@gmail.com","900000009","Mumbai","2024-04-02","Retail"],[10,"John Peter","john@gmail.com","900000010","Pune","2024-06-19","Corporate"]]},"date_calendar":{"columns":["date_key","full_date","year","quarter","month","month_name","week_of_year","day_of_month","day_name","is_weekend"],"rows":[[20240101,"2024-01-01",2024,1,1,"January",1,1,"Monday",0],[20240102,"2024-01-02",2024,1,1,"January",1,2,"Tuesday",0],[20240103,"2024-01-03",2024,1,1,"January",1,3,"Wednesday",0],[20240104,"2024-01-04",2024,1,1,"January",1,4,"Thursday",0],[20240105,"2024-01-05",2024,1,1,"January",1,5,"Friday",0],[20240106,"2024-01-06",2024,1,1,"January",1,6,"Saturday",1],[20240107,"2024-01-07",2024,1,1,"January",1,7,"Sunday",1],[20240201,"2024-02-01",2024,1,2,"February",5,1,"Thursday",0],[20240301,"2024-03-01",2024,1,3,"March",9,1,"Friday",0],[20240401,"2024-04-01",2024,2,4,"April",14,1,"Monday",0],[20240501,"2024-05-01",2024,2,5,"May",18,1,"Wednesday",0],[20240601,"2024-06-01",2024,2,6,"June",22,1,"Saturday",1],[20240701,"2024-07-01",2024,3,7,"July",27,1,"Monday",0],[20240801,"2024-08-01",2024,3,8,"August",31,1,"Thursday",0]]},"departments":{"columns":["department_id","department_name","location","budget"],"rows":[[1,"Data Engineering","Hyderabad",12000000.0],[2,"Sales","Bangalore",9000000.0],[3,"HR","Hyderabad",5000000.0],[4,"Finance","Mumbai",7000000.0],[5,"IT Support","Pune",6000000.0],[6,"Marketing","Chennai",5500000.0]]},"duplicate_customers":{"columns":["record_id","customer_name","email","phone","city","created_at"],"rows":[[1,"Amit Sharma","amit@gmail.com","900000001","Hyderabad","2024-01-01"],[2,"Amit Sharma","amit@gmail.com","900000001","Hyderabad","2024-01-02"],[3,"Bhavna Rao","bhavna@gmail.com","900000002","Bangalore","2024-01-03"],[4,"Bhavna Rao","bhavna@gmail.com","900000002","Bangalore","2024-01-04"],[5,"Chandra Kumar","chandra@gmail.com","900000003","Mumbai","2024-01-05"],[6,"Chandra Kumar","chandra2@gmail.com","900000003","Mumbai","2024-01-06"],[7,"Deepa Singh","deepa@gmail.com","900000004","Hyderabad","2024-01-07"]]},"employee_sales_history":{"columns":["history_id","employee_id","effective_from","effective_to","sales_target","region","is_current"],"rows":[[1,3,"2023-01-01","2023-12-31",800000.0,"South",0],[2,3,"2024-01-01",null,1000000.0,"South",1],[3,4,"2023-01-01","2024-03-31",750000.0,"South",0],[4,4,"2024-04-01",null,900000.0,"West",1],[5,9,"2023-01-01",null,1200000.0,"West",1]]},"employee_scd2":{"columns":["scd_id","employee_id","department_id","job_title","salary","effective_from","effective_to","is_current"],"rows":[[1,1,1,"Data Engineer",900000.0,"2021-01-01","2022-12-31",0],[2,1,1,"Senior Data Engineer",1200000.0,"2023-01-01",null,1],[3,2,1,"Data Engineer",900000.0,"2021-06-15","2023-12-31",0],[4,2,1,"Senior Data Engineer",1100000.0,"2024-01-01",null,1],[5,3,2,"Sales Executive",600000.0,"2022-03-12","2023-12-31",0],[6,3,2,"Sales Executive",700000.0,"2024-01-01",null,1],[7,4,2,"Sales Executive",650000.0,"2021-09-01",null,1]]},"employees":{"columns":["employee_id","employee_name","email","gender","department_id","manager_id","job_title","hire_date","salary","city","status"],"rows":[[1,"Arjun Rao","arjun@demo.com","M",1,101,"Senior Data Engineer","2020-01-10",1500000.0,"Hyderabad","Active"],[2,"Meena Das","meena@demo.com","F",1,101,"Data Engineer","2021-06-15",1100000.0,"Hyderabad","Active"],[3,"Vikram Singh","vikram@demo.com","M",2,102,"Sales Executive","2022-03-12",700000.0,"Bangalore","Active"],[4,"Sneha Patel","sneha@demo.com","F",2,102,"Sales Executive","2021-09-01",760000.0,"Mumbai","Active"],[5,"Ravi Kumar","ravi@demo.com","M",3,103,"HR Analyst","2020-08-20",650000.0,"Hyderabad","Active"],[6,"Divya Rao","divya@demo.com","F",4,104,"Finance Analyst","2023-01-12",800000.0,"Mumbai","Active"],[7,"Suresh Babu","suresh@demo.com","M",5,105,"Support Engineer","2019-05-03",720000.0,"Pune","Inactive"],[8,"Anita Singh","anita@demo.com","F",1,101,"Data Engineer","2022-11-07",950000.0,"Hyderabad","Active"],[9,"Mohan Reddy","mohan@demo.com","M",2,102,"Sales Manager","2018-06-01",1200000.0,"Bangalore","Active"],[10,"Lakshmi Devi","lakshmi@demo.com","F",6,null,"Marketing Analyst","2024-02-10",680000.0,"Chennai","Active"],[11,"Ramesh","ramesh@demo.com","M",1,101,"Data Engineer","2023-04-10",900000.0,"Hyderabad","Active"],[12,"Pooja","pooja@demo.com","F",2,102,"Sales Executive","2024-05-11",620000.0,"Bangalore","Active"]]},"login_history":{"columns":["login_id","employee_id","login_time","logout_time","ip_address","login_status","device"],"rows":[[1,1,"2024-08-01 09:00","2024-08-01 18:00","10.0.0.1","Success","Laptop"],[2,2,"2024-08-01 09:15","2024-08-01 18:15","10.0.0.2","Success","Laptop"],[3,3,"2024-08-01 09:30","2024-08-01 17:30","10.0.0.3","Success","Mobile"],[4,3,"2024-08-02 09:31",null,"10.0.0.3","Failed","Mobile"],[5,4,"2024-08-02 08:55","2024-08-02 17:55","10.0.0.4","Success","Laptop"],[6,5,"2024-08-02 09:05","2024-08-02 18:05","10.0.0.5","Success","Laptop"]]},"managers":{"columns":["manager_id","manager_name","department_id","hire_date","salary"],"rows":[[101,"Anil Kumar",1,"2019-04-10",1800000.0],[102,"Priya Sharma",2,"2020-01-15",1600000.0],[103,"Rahul Verma",3,"2018-07-20",1500000.0],[104,"Neha Reddy",4,"2021-02-05",1700000.0],[105,"Kiran Rao",5,"2017-11-11",1400000.0]]},"order_items":{"columns":["order_item_id","order_id","product_id","quantity","unit_price","discount_pct"],"rows":[[1,1001,101,1,85000.0,0.0],[2,1001,102,2,1200.0,0.0],[3,1002,104,1,22000.0,0.0],[4,1002,103,1,2500.0,0.0],[5,1003,104,1,22000.0,0.0],[6,1004,105,1,12000.0,0.0],[7,1005,107,10,5000.0,0.0],[8,1006,106,2,18000.0,0.0],[9,1007,106,1,18000.0,0.0],[10,1008,101,1,85000.0,0.0],[11,1008,107,2,5000.0,0.0],[12,1009,107,1,5000.0,0.0],[13,1010,104,1,22000.0,0.0],[14,1010,108,3,1800.0,0.0],[15,1011,103,10,2500.0,0.0],[16,1012,105,1,12000.0,0.0],[17,1012,108,2,1800.0,0.0],[18,1013,101,1,85000.0,0.0],[19,1014,104,1,22000.0,0.0]]},"orders":{"columns":["order_id","customer_id","order_date","status","sales_channel","shipping_city","total_amount"],"rows":[[1001,1,"2024-01-05","Delivered","Online","Hyderabad",87400.0],[1002,2,"2024-01-10","Delivered","Store","Bangalore",25200.0],[1003,3,"2024-02-03","Cancelled","Online","Mumbai",22000.0],[1004,4,"2024-02-15","Delivered","Online","Hyderabad",12000.0],[1005,5,"2024-03-01","Delivered","Online","Pune",50000.0],[1006,6,"2024-03-18","Shipped","Store","Chennai",36500.0],[1007,7,"2024-04-05","Delivered","Online","Hyderabad",18000.0],[1008,8,"2024-04-21","Delivered","Online","Bangalore",102000.0],[1009,9,"2024-05-11","Returned","Store","Mumbai",5000.0],[1010,10,"2024-06-02","Delivered","Online","Pune",27000.0],[1011,1,"2024-06-18","Delivered","Online","Hyderabad",25000.0],[1012,2,"2024-07-09","Delivered","Store","Bangalore",17000.0],[1013,3,"2024-07-20","Delivered","Online","Mumbai",88000.0],[1014,4,"2024-08-03","Pending","Online","Hyderabad",22000.0]]},"patients":{"columns":["patient_id","patient_name","gender","birth_date","city"],"rows":[[120,"John Smith","M","1980-04-12","Hyderabad"],[121,"Mary Jones","F","1990-09-22","Bangalore"],[122,"Robert Brown","M","1975-01-17","Mumbai"],[123,"Anita Rao","F","1988-11-30","Hyderabad"],[124,"David Lee","M","1995-06-05","Pune"],[125,"Sara Khan","F","1985-02-14","Chennai"]]},"products":{"columns":["product_id","product_name","category","price","cost","stock_qty","supplier"],"rows":[[101,"Laptop Pro","Electronics",85000.0,62000.0,40,"Dell"],[102,"Wireless Mouse","Electronics",1200.0,600.0,200,"Logitech"],[103,"Keyboard","Electronics",2500.0,1300.0,150,"HP"],[104,"Monitor 27","Electronics",22000.0,15000.0,60,"LG"],[105,"Office Chair","Furniture",12000.0,7000.0,80,"GreenSoul"],[106,"Desk","Furniture",18000.0,11000.0,50,"Ikea"],[107,"Headphones","Electronics",5000.0,2700.0,100,"Sony"],[108,"USB Hub","Accessories",1800.0,900.0,130,"TPLink"],[109,"Notebook","Stationery",300.0,120.0,500,"Classmate"],[110,"Printer","Electronics",16000.0,10500.0,35,"Canon"]]},"salaries":{"columns":["salary_id","employee_id","salary","effective_from","effective_to"],"rows":[[1,1,900000.0,"2021-01-01","2022-12-31"],[2,1,1200000.0,"2023-01-01","2024-12-31"],[3,1,1500000.0,"2025-01-01",null],[4,2,900000.0,"2021-06-15","2023-12-31"],[5,2,1100000.0,"2024-01-01",null],[6,3,600000.0,"2022-03-12","2023-12-31"],[7,3,700000.0,"2024-01-01",null]]},"sales":{"columns":["sale_id","order_id","employee_id","sale_date","region","gross_amount","discount_amount","net_amount"],"rows":[[1,1001,3,"2024-01-05","South",87400.0,0.0,87400.0],[2,1002,4,"2024-01-10","South",24500.0,0.0,24500.0],[3,1004,3,"2024-02-15","South",12000.0,0.0,12000.0],[4,1005,9,"2024-03-01","West",50000.0,0.0,50000.0],[5,1006,4,"2024-03-18","South",36500.0,0.0,36500.0],[6,1007,3,"2024-04-05","South",18000.0,0.0,18000.0],[7,1008,9,"2024-04-21","South",95000.0,5000.0,90000.0],[8,1010,4,"2024-06-02","West",27000.0,0.0,27000.0],[9,1011,3,"2024-06-18","South",25000.0,0.0,25000.0],[10,1012,4,"2024-07-09","South",15600.0,600.0,15000.0],[11,1013,9,"2024-07-20","West",88000.0,0.0,88000.0]]},"transactions":{"columns":["transaction_id","customer_id","order_id","transaction_date","transaction_type","amount","payment_method","status"],"rows":[[1,1,1001,"2024-01-05","Payment",87400.0,"UPI","Success"],[2,2,1002,"2024-01-10","Payment",25200.0,"Card","Success"],[3,3,1003,"2024-02-03","Payment",22000.0,"Card","Failed"],[4,4,1004,"2024-02-15","Payment",12000.0,"UPI","Success"],[5,5,1005,"2024-03-01","Payment",50000.0,"NetBanking","Success"],[6,6,1006,"2024-03-18","Payment",36500.0,"Card","Success"],[7,7,1007,"2024-04-05","Payment",18000.0,"UPI","Success"],[8,8,1008,"2024-04-21","Payment",102000.0,"Card","Success"],[9,9,1009,"2024-05-11","Refund",5000.0,"Card","Success"],[10,10,1010,"2024-06-02","Payment",27000.0,"UPI","Success"],[11,1,1011,"2024-06-18","Payment",25000.0,"Card","Success"],[12,2,1012,"2024-07-09","Payment",17000.0,"UPI","Success"]]},"visits":{"columns":["visit_id","patient_id","visit_date","doctor","visit_type","amount"],"rows":[[1,120,"2024-01-02","Dr Rao","Emergency",1500.0],[2,121,"2024-01-05","Dr Mehta","OPD",900.0],[3,122,"2024-02-10","Dr Rao","OPD",700.0],[4,123,"2024-02-12","Dr Kumar","Emergency",2000.0],[5,124,"2024-03-01","Dr Singh","OPD",800.0],[6,125,"2024-03-10","Dr Mehta","OPD",750.0],[7,120,"2024-04-15","Dr Rao","OPD",950.0],[8,121,"2024-05-01","Dr Mehta","OPD",800.0]]}},"questions":[{"id":"SQL01","title":"Employees earning more than their department average","difficulty":"Easy","topic":"Subquery + GROUP BY","prompt":"Return employee_name, department_id, and salary for every employee whose salary is greater than the average salary of employees in the same department. Sort by department_id and salary descending.","tables":["employees"],"hint":"Calculate the department average in a correlated subquery or CTE, then compare each employee's salary to it.","sql":"SELECT e.employee_name,e.department_id,e.salary FROM employees e WHERE e.salary > (SELECT AVG(x.salary) FROM employees x WHERE x.department_id=e.department_id) ORDER BY e.department_id,e.salary DESC;","columns":["employee_name","department_id","salary"],"expected":[["Arjun Rao",1,1500000.0],["Mohan Reddy",2,1200000.0]]},{"id":"SQL02","title":"Second highest distinct salary","difficulty":"Easy","topic":"Subquery","prompt":"Find the second highest distinct salary in the employees table. Return one column named second_highest_salary.","tables":["employees"],"hint":"First identify the maximum salary, then find the maximum salary below it. Think about duplicate salaries.","sql":"SELECT MAX(salary) AS second_highest_salary FROM employees WHERE salary < (SELECT MAX(salary) FROM employees);","columns":["second_highest_salary"],"expected":[[1200000.0]]},{"id":"SQL03","title":"Top 3 earners in every department","difficulty":"Medium","topic":"Window Functions","prompt":"For every department, return employee_name, department_id, salary and salary_rank. Include employees whose DENSE_RANK is 3 or less within their department. Sort by department_id and salary_rank.","tables":["employees","departments"],"hint":"Use DENSE_RANK() with PARTITION BY department_id and ORDER BY salary DESC.","sql":"SELECT employee_name,department_id,salary,salary_rank FROM (SELECT employee_name,department_id,salary,DENSE_RANK() OVER(PARTITION BY department_id ORDER BY salary DESC) AS salary_rank FROM employees) x WHERE salary_rank<=3 ORDER BY department_id,salary_rank,salary DESC;","columns":["employee_name","department_id","salary","salary_rank"],"expected":[["Arjun Rao",1,1500000.0,1],["Meena Das",1,1100000.0,2],["Anita Singh",1,950000.0,3],["Mohan Reddy",2,1200000.0,1],["Sneha Patel",2,760000.0,2],["Vikram Singh",2,700000.0,3],["Ravi Kumar",3,650000.0,1],["Divya Rao",4,800000.0,1],["Suresh Babu",5,720000.0,1],["Lakshmi Devi",6,680000.0,1]]},{"id":"SQL04","title":"Show each employee with their manager","difficulty":"Easy","topic":"SELF/LEFT JOIN","prompt":"Display employee_name, job_title and manager_name for every employee. Employees without a manager must still appear. Sort by employee_id.","tables":["employees","managers"],"hint":"employees.manager_id points to managers.manager_id. Use a LEFT JOIN.","sql":"SELECT e.employee_name,e.job_title,m.manager_name FROM employees e LEFT JOIN managers m ON e.manager_id=m.manager_id ORDER BY e.employee_id;","columns":["employee_name","job_title","manager_name"],"expected":[["Arjun Rao","Senior Data Engineer","Anil Kumar"],["Meena Das","Data Engineer","Anil Kumar"],["Vikram Singh","Sales Executive","Priya Sharma"],["Sneha Patel","Sales Executive","Priya Sharma"],["Ravi Kumar","HR Analyst","Rahul Verma"],["Divya Rao","Finance Analyst","Neha Reddy"],["Suresh Babu","Support Engineer","Kiran Rao"],["Anita Singh","Data Engineer","Anil Kumar"],["Mohan Reddy","Sales Manager","Priya Sharma"],["Lakshmi Devi","Marketing Analyst",null],["Ramesh","Data Engineer","Anil Kumar"],["Pooja","Sales Executive","Priya Sharma"]]},{"id":"SQL05","title":"Departments with no employees","difficulty":"Easy","topic":"LEFT JOIN","prompt":"List department_id and department_name for departments that currently have no employees.","tables":["departments","employees"],"hint":"LEFT JOIN departments to employees and filter where the employee key is NULL.","sql":"SELECT d.department_id,d.department_name FROM departments d LEFT JOIN employees e ON d.department_id=e.department_id WHERE e.employee_id IS NULL ORDER BY d.department_id;","columns":["department_id","department_name"],"expected":[]},{"id":"SQL06","title":"Department salary summary","difficulty":"Easy","topic":"GROUP BY","prompt":"For each department that has employees, return department_name, employee_count, minimum_salary, maximum_salary and average_salary rounded to 2 decimals. Sort by average_salary descending.","tables":["departments","employees"],"hint":"Join the tables, GROUP BY the department, and use COUNT/MIN/MAX/AVG.","sql":"SELECT d.department_name,COUNT(e.employee_id) AS employee_count,MIN(e.salary) AS minimum_salary,MAX(e.salary) AS maximum_salary,ROUND(AVG(e.salary),2) AS average_salary FROM departments d JOIN employees e ON d.department_id=e.department_id GROUP BY d.department_id,d.department_name ORDER BY average_salary DESC;","columns":["department_name","employee_count","minimum_salary","maximum_salary","average_salary"],"expected":[["Data Engineering",4,900000.0,1500000.0,1112500.0],["Sales",4,620000.0,1200000.0,820000.0],["Finance",1,800000.0,800000.0,800000.0],["IT Support",1,720000.0,720000.0,720000.0],["Marketing",1,680000.0,680000.0,680000.0],["HR",1,650000.0,650000.0,650000.0]]},{"id":"SQL07","title":"Find duplicate customer emails","difficulty":"Easy","topic":"Duplicates","prompt":"Identify customer email addresses that appear more than once in duplicate_customers. Return email and duplicate_count, only for duplicates.","tables":["duplicate_customers"],"hint":"GROUP BY email and filter groups with HAVING COUNT(*) > 1.","sql":"SELECT email,COUNT(*) AS duplicate_count FROM duplicate_customers GROUP BY email HAVING COUNT(*)>1 ORDER BY duplicate_count DESC,email;","columns":["email","duplicate_count"],"expected":[["amit@gmail.com",2],["bhavna@gmail.com",2]]},{"id":"SQL08","title":"Keep only the latest customer record","difficulty":"Medium","topic":"ROW_NUMBER + Duplicates","prompt":"For each email in duplicate_customers, return only the most recently created record. Return record_id, customer_name, email, phone, city and created_at.","tables":["duplicate_customers"],"hint":"Use ROW_NUMBER() PARTITION BY email ORDER BY created_at DESC, then keep rn = 1.","sql":"SELECT record_id,customer_name,email,phone,city,created_at FROM (SELECT d.*,ROW_NUMBER() OVER(PARTITION BY email ORDER BY created_at DESC,record_id DESC) rn FROM duplicate_customers d) x WHERE rn=1 ORDER BY record_id;","columns":["record_id","customer_name","email","phone","city","created_at"],"expected":[[2,"Amit Sharma","amit@gmail.com","900000001","Hyderabad","2024-01-02"],[4,"Bhavna Rao","bhavna@gmail.com","900000002","Bangalore","2024-01-04"],[5,"Chandra Kumar","chandra@gmail.com","900000003","Mumbai","2024-01-05"],[6,"Chandra Kumar","chandra2@gmail.com","900000003","Mumbai","2024-01-06"],[7,"Deepa Singh","deepa@gmail.com","900000004","Hyderabad","2024-01-07"]]},{"id":"SQL09","title":"Find duplicate rows but keep the first","difficulty":"Medium","topic":"ROW_NUMBER","prompt":"Return every duplicate customer record that should be removed if the oldest record is retained for each email.","tables":["duplicate_customers"],"hint":"Assign ROW_NUMBER by email ordered from oldest to newest. Rows with rn > 1 are removable duplicates.","sql":"SELECT record_id,customer_name,email,created_at FROM (SELECT d.*,ROW_NUMBER() OVER(PARTITION BY email ORDER BY created_at,record_id) rn FROM duplicate_customers d) x WHERE rn>1 ORDER BY email,created_at;","columns":["record_id","customer_name","email","created_at"],"expected":[[2,"Amit Sharma","amit@gmail.com","2024-01-02"],[4,"Bhavna Rao","bhavna@gmail.com","2024-01-04"]]},{"id":"SQL10","title":"Customers who never placed an order","difficulty":"Easy","topic":"LEFT JOIN / NOT EXISTS","prompt":"Return customer_id and customer_name for customers who have never placed an order.","tables":["customers","orders"],"hint":"A LEFT JOIN with NULL order_id is one approach. NOT EXISTS is another.","sql":"SELECT c.customer_id,c.customer_name FROM customers c LEFT JOIN orders o ON c.customer_id=o.customer_id WHERE o.order_id IS NULL ORDER BY c.customer_id;","columns":["customer_id","customer_name"],"expected":[]},{"id":"SQL11","title":"Top 3 customers by delivered revenue","difficulty":"Medium","topic":"JOIN + GROUP BY","prompt":"Using only Delivered orders, find the top 3 customers by total order revenue. Return customer_name and revenue, highest first.","tables":["customers","orders"],"hint":"Join customers to orders, filter status, GROUP BY customer, SUM total_amount, ORDER BY DESC, LIMIT 3.","sql":"SELECT c.customer_name,SUM(o.total_amount) AS revenue FROM customers c JOIN orders o ON c.customer_id=o.customer_id WHERE o.status='Delivered' GROUP BY c.customer_id,c.customer_name ORDER BY revenue DESC LIMIT 3;","columns":["customer_name","revenue"],"expected":[["Amit Sharma",112400.0],["Hari Kumar",102000.0],["Chandra Kumar",88000.0]]},{"id":"SQL12","title":"Products never sold","difficulty":"Easy","topic":"LEFT JOIN","prompt":"List products that do not appear in order_items at all. Return product_id and product_name.","tables":["products","order_items"],"hint":"LEFT JOIN products to order_items and look for NULL matches.","sql":"SELECT p.product_id,p.product_name FROM products p LEFT JOIN order_items oi ON p.product_id=oi.product_id WHERE oi.product_id IS NULL ORDER BY p.product_id;","columns":["product_id","product_name"],"expected":[[109,"Notebook"],[110,"Printer"]]},{"id":"SQL13","title":"Calculate each order from order items","difficulty":"Medium","topic":"Aggregation","prompt":"For every order_id in order_items, calculate the order total as quantity × unit_price after discount. Return order_id and calculated_total rounded to 2 decimals.","tables":["order_items"],"hint":"The discount is a percentage. Aggregate quantity * unit_price * (1 - discount_pct/100).","sql":"SELECT order_id,ROUND(SUM(quantity*unit_price*(1-discount_pct/100.0)),2) AS calculated_total FROM order_items GROUP BY order_id ORDER BY order_id;","columns":["order_id","calculated_total"],"expected":[[1001,87400.0],[1002,24500.0],[1003,22000.0],[1004,12000.0],[1005,50000.0],[1006,36000.0],[1007,18000.0],[1008,95000.0],[1009,5000.0],[1010,27400.0],[1011,25000.0],[1012,15600.0],[1013,85000.0],[1014,22000.0]]},{"id":"SQL14","title":"Best-selling product by quantity","difficulty":"Medium","topic":"JOIN + GROUP BY","prompt":"Find the product with the highest total quantity sold. Return product_id, product_name and total_quantity. Include all products only if needed; the final answer should contain the top product.","tables":["products","order_items"],"hint":"SUM quantity per product, sort descending, then take the first row.","sql":"SELECT p.product_id,p.product_name,SUM(oi.quantity) AS total_quantity FROM products p JOIN order_items oi ON p.product_id=oi.product_id GROUP BY p.product_id,p.product_name ORDER BY total_quantity DESC,p.product_id LIMIT 1;","columns":["product_id","product_name","total_quantity"],"expected":[[107,"Headphones",13]]},{"id":"SQL15","title":"Running revenue by sale date","difficulty":"Medium","topic":"Window Function","prompt":"Return each sale's sale_date, sale_id, net_amount and cumulative revenue up to that sale. Order by sale_date and sale_id.","tables":["sales"],"hint":"Use SUM(net_amount) OVER(ORDER BY sale_date,sale_id).","sql":"SELECT sale_date,sale_id,net_amount,SUM(net_amount) OVER(ORDER BY sale_date,sale_id) AS running_revenue FROM sales ORDER BY sale_date,sale_id;","columns":["sale_date","sale_id","net_amount","running_revenue"],"expected":[["2024-01-05",1,87400.0,87400.0],["2024-01-10",2,24500.0,111900.0],["2024-02-15",3,12000.0,123900.0],["2024-03-01",4,50000.0,173900.0],["2024-03-18",5,36500.0,210400.0],["2024-04-05",6,18000.0,228400.0],["2024-04-21",7,90000.0,318400.0],["2024-06-02",8,27000.0,345400.0],["2024-06-18",9,25000.0,370400.0],["2024-07-09",10,15000.0,385400.0],["2024-07-20",11,88000.0,473400.0]]},{"id":"SQL16","title":"Previous order date for each customer","difficulty":"Medium","topic":"LAG","prompt":"For every order, return customer_id, order_id, order_date and the customer's previous order date. The first order for a customer should have NULL.","tables":["orders"],"hint":"LAG(order_date) over each customer ordered by order_date.","sql":"SELECT customer_id,order_id,order_date,LAG(order_date) OVER(PARTITION BY customer_id ORDER BY order_date,order_id) AS previous_order_date FROM orders ORDER BY customer_id,order_date;","columns":["customer_id","order_id","order_date","previous_order_date"],"expected":[[1,1001,"2024-01-05",null],[1,1011,"2024-06-18","2024-01-05"],[2,1002,"2024-01-10",null],[2,1012,"2024-07-09","2024-01-10"],[3,1003,"2024-02-03",null],[3,1013,"2024-07-20","2024-02-03"],[4,1004,"2024-02-15",null],[4,1014,"2024-08-03","2024-02-15"],[5,1005,"2024-03-01",null],[6,1006,"2024-03-18",null],[7,1007,"2024-04-05",null],[8,1008,"2024-04-21",null],[9,1009,"2024-05-11",null],[10,1010,"2024-06-02",null]]},{"id":"SQL17","title":"Rank employees by salary within department","difficulty":"Easy","topic":"DENSE_RANK","prompt":"Return employee_name, department_id, salary and salary_rank using DENSE_RANK within each department. Highest salary should be rank 1.","tables":["employees"],"hint":"DENSE_RANK() OVER(PARTITION BY department_id ORDER BY salary DESC).","sql":"SELECT employee_name,department_id,salary,DENSE_RANK() OVER(PARTITION BY department_id ORDER BY salary DESC) AS salary_rank FROM employees ORDER BY department_id,salary_rank,employee_name;","columns":["employee_name","department_id","salary","salary_rank"],"expected":[["Arjun Rao",1,1500000.0,1],["Meena Das",1,1100000.0,2],["Anita Singh",1,950000.0,3],["Ramesh",1,900000.0,4],["Mohan Reddy",2,1200000.0,1],["Sneha Patel",2,760000.0,2],["Vikram Singh",2,700000.0,3],["Pooja",2,620000.0,4],["Ravi Kumar",3,650000.0,1],["Divya Rao",4,800000.0,1],["Suresh Babu",5,720000.0,1],["Lakshmi Devi",6,680000.0,1]]},{"id":"SQL18","title":"Employees earning more than company average","difficulty":"Easy","topic":"Subquery","prompt":"Return employee_name and salary for employees whose salary is above the average salary of the entire company.","tables":["employees"],"hint":"Compare salary with a scalar AVG(salary) subquery.","sql":"SELECT employee_name,salary FROM employees WHERE salary>(SELECT AVG(salary) FROM employees) ORDER BY salary DESC;","columns":["employee_name","salary"],"expected":[["Arjun Rao",1500000.0],["Mohan Reddy",1200000.0],["Meena Das",1100000.0],["Anita Singh",950000.0],["Ramesh",900000.0]]},{"id":"SQL19","title":"Monthly sales revenue","difficulty":"Easy","topic":"Date + GROUP BY","prompt":"Calculate total net sales for each month represented in sales. Return month (YYYY-MM) and revenue, sorted chronologically.","tables":["sales"],"hint":"In SQLite, substr(sale_date,1,7) extracts YYYY-MM.","sql":"SELECT substr(sale_date,1,7) AS month,SUM(net_amount) AS revenue FROM sales GROUP BY month ORDER BY month;","columns":["month","revenue"],"expected":[["2024-01",111900.0],["2024-02",12000.0],["2024-03",86500.0],["2024-04",108000.0],["2024-06",52000.0],["2024-07",103000.0]]},{"id":"SQL20","title":"Month-over-month revenue change","difficulty":"Hard","topic":"CTE + LAG","prompt":"Using monthly sales revenue, show month, revenue, previous_month_revenue and growth_percent. Growth should be rounded to 2 decimals and be NULL when there is no previous month.","tables":["sales"],"hint":"First aggregate by month in a CTE. Then use LAG on the monthly result.","sql":"WITH m AS (SELECT substr(sale_date,1,7) AS month,SUM(net_amount) AS revenue FROM sales GROUP BY month) SELECT month,revenue,LAG(revenue) OVER(ORDER BY month) AS previous_month_revenue,ROUND(100.0*(revenue-LAG(revenue) OVER(ORDER BY month))/NULLIF(LAG(revenue) OVER(ORDER BY month),0),2) AS growth_percent FROM m ORDER BY month;","columns":["month","revenue","previous_month_revenue","growth_percent"],"expected":[["2024-01",111900.0,null,null],["2024-02",12000.0,111900.0,-89.28],["2024-03",86500.0,12000.0,620.83],["2024-04",108000.0,86500.0,24.86],["2024-06",52000.0,108000.0,-51.85],["2024-07",103000.0,52000.0,98.08]]},{"id":"SQL21","title":"Current SCD Type 2 records","difficulty":"Easy","topic":"SCD Type 2","prompt":"Return the current version of every employee stored in employee_scd2. Include employee_id, department_id, job_title, salary and effective_from.","tables":["employee_scd2"],"hint":"The current SCD2 record is identified by is_current = 1.","sql":"SELECT employee_id,department_id,job_title,salary,effective_from FROM employee_scd2 WHERE is_current=1 ORDER BY employee_id;","columns":["employee_id","department_id","job_title","salary","effective_from"],"expected":[[1,1,"Senior Data Engineer",1200000.0,"2023-01-01"],[2,1,"Senior Data Engineer",1100000.0,"2024-01-01"],[3,2,"Sales Executive",700000.0,"2024-01-01"],[4,2,"Sales Executive",650000.0,"2021-09-01"]]},{"id":"SQL22","title":"Employee history with version numbers","difficulty":"Medium","topic":"SCD Type 2 + Window","prompt":"For each employee in employee_scd2, assign version_number starting at 1 from the oldest effective_from date. Return employee_id, version_number, job_title, salary and effective_from.","tables":["employee_scd2"],"hint":"ROW_NUMBER partitioned by employee_id and ordered by effective_from.","sql":"SELECT employee_id,ROW_NUMBER() OVER(PARTITION BY employee_id ORDER BY effective_from) AS version_number,job_title,salary,effective_from FROM employee_scd2 ORDER BY employee_id,effective_from;","columns":["employee_id","version_number","job_title","salary","effective_from"],"expected":[[1,1,"Data Engineer",900000.0,"2021-01-01"],[1,2,"Senior Data Engineer",1200000.0,"2023-01-01"],[2,1,"Data Engineer",900000.0,"2021-06-15"],[2,2,"Senior Data Engineer",1100000.0,"2024-01-01"],[3,1,"Sales Executive",600000.0,"2022-03-12"],[3,2,"Sales Executive",700000.0,"2024-01-01"],[4,1,"Sales Executive",650000.0,"2021-09-01"]]},{"id":"SQL23","title":"Point-in-time SCD2 lookup","difficulty":"Hard","topic":"SCD Type 2","prompt":"Find the employee_id = 1 record that was valid on 2023-06-01. Return the full SCD2 row.","tables":["employee_scd2"],"hint":"The date must be >= effective_from and <= effective_to. Treat a NULL effective_to as an open-ended future date.","sql":"SELECT * FROM employee_scd2 WHERE employee_id=1 AND '2023-06-01'>=effective_from AND '2023-06-01'<=COALESCE(effective_to,'9999-12-31');","columns":["scd_id","employee_id","department_id","job_title","salary","effective_from","effective_to","is_current"],"expected":[[2,1,1,"Senior Data Engineer",1200000.0,"2023-01-01",null,1]]},{"id":"SQL24","title":"Employees whose department changed","difficulty":"Medium","topic":"SCD Type 2","prompt":"Identify employees who have more than one SCD2 version. Return employee_id and version_count.","tables":["employee_scd2"],"hint":"GROUP BY employee_id and use HAVING COUNT(*) > 1.","sql":"SELECT employee_id,COUNT(*) AS version_count FROM employee_scd2 GROUP BY employee_id HAVING COUNT(*)>1 ORDER BY employee_id;","columns":["employee_id","version_count"],"expected":[[1,2],[2,2],[3,2]]},{"id":"SQL25","title":"Successful transaction rate by payment method","difficulty":"Medium","topic":"CASE + Aggregation","prompt":"For each payment_method, calculate the percentage of transactions with status = 'Success'. Return payment_method and success_rate_percent rounded to 2 decimals.","tables":["transactions"],"hint":"Use SUM(CASE WHEN status='Success' THEN 1 ELSE 0 END) / COUNT(*).","sql":"SELECT payment_method,ROUND(100.0*SUM(CASE WHEN status='Success' THEN 1 ELSE 0 END)/COUNT(*),2) AS success_rate_percent FROM transactions GROUP BY payment_method ORDER BY payment_method;","columns":["payment_method","success_rate_percent"],"expected":[["Card",83.33],["NetBanking",100.0],["UPI",100.0]]},{"id":"SQL26","title":"Employees with failed logins","difficulty":"Easy","topic":"GROUP BY + HAVING","prompt":"Find employees who have at least one failed login. Return employee_id and failed_login_count.","tables":["login_history"],"hint":"Filter login_status = 'Failed', group by employee_id, count rows.","sql":"SELECT employee_id,COUNT(*) AS failed_login_count FROM login_history WHERE login_status='Failed' GROUP BY employee_id ORDER BY employee_id;","columns":["employee_id","failed_login_count"],"expected":[[3,1]]},{"id":"SQL27","title":"Login duration","difficulty":"Medium","topic":"Date/Time","prompt":"For successful logins with a logout time, calculate hours_logged between login_time and logout_time. Return employee_id, login_time and hours_logged rounded to 2 decimals.","tables":["login_history"],"hint":"SQLite's julianday() can calculate the difference between timestamps.","sql":"SELECT employee_id,login_time,ROUND((julianday(logout_time)-julianday(login_time))*24,2) AS hours_logged FROM login_history WHERE login_status='Success' AND logout_time IS NOT NULL ORDER BY login_time;","columns":["employee_id","login_time","hours_logged"],"expected":[[1,"2024-08-01 09:00",9.0],[2,"2024-08-01 09:15",9.0],[3,"2024-08-01 09:30",8.0],[4,"2024-08-02 08:55",9.0],[5,"2024-08-02 09:05",9.0]]},{"id":"SQL28","title":"Weekend vs weekday revenue","difficulty":"Medium","topic":"Calendar Join","prompt":"Using date_calendar, compare total net revenue for weekend and weekday sales. Return is_weekend and revenue.","tables":["sales","date_calendar"],"hint":"Join sales.sale_date to date_calendar.full_date and group by is_weekend.","sql":"SELECT d.is_weekend,SUM(s.net_amount) AS revenue FROM sales s JOIN date_calendar d ON s.sale_date=d.full_date GROUP BY d.is_weekend ORDER BY d.is_weekend;","columns":["is_weekend","revenue"],"expected":[[0,137400.0]]},{"id":"SQL29","title":"Patients with multiple admissions","difficulty":"Easy","topic":"GROUP BY + HAVING","prompt":"Find patients who were admitted more than once. Return patient_id and admission_count.","tables":["patients","admissions"],"hint":"Count admissions per patient and filter counts greater than 1.","sql":"SELECT p.patient_id,p.patient_name,COUNT(a.admission_id) AS admission_count FROM patients p JOIN admissions a ON p.patient_id=a.patient_id GROUP BY p.patient_id,p.patient_name HAVING COUNT(a.admission_id)>1 ORDER BY p.patient_id;","columns":["patient_id","patient_name","admission_count"],"expected":[[120,"John Smith",2],[121,"Mary Jones",2]]},{"id":"SQL30","title":"Hospital admissions: max, min and average visits","difficulty":"Easy","topic":"Aggregate Functions","prompt":"Return one row containing max_visits, min_visits and average_visits from admissions. Round average_visits to 2 decimals.","tables":["admissions"],"hint":"Use MAX, MIN and ROUND(AVG(...),2) without GROUP BY.","sql":"SELECT MAX(number_of_visits) AS max_visits,MIN(number_of_visits) AS min_visits,ROUND(AVG(number_of_visits),2) AS average_visits FROM admissions;","columns":["max_visits","min_visits","average_visits"],"expected":[[5,1,2.88]]},{"id":"SQL31","title":"Salesperson with highest total revenue","difficulty":"Medium","topic":"JOIN + GROUP BY","prompt":"Find the employee who generated the highest total net sales. Return employee_id, employee_name and total_revenue.","tables":["employees","sales"],"hint":"Join employees to sales, aggregate by employee, sort revenue descending and take one row.","sql":"SELECT e.employee_id,e.employee_name,SUM(s.net_amount) AS total_revenue FROM employees e JOIN sales s ON e.employee_id=s.employee_id GROUP BY e.employee_id,e.employee_name ORDER BY total_revenue DESC LIMIT 1;","columns":["employee_id","employee_name","total_revenue"],"expected":[[9,"Mohan Reddy",228000.0]]},{"id":"SQL32","title":"Top 2 salespeople in each region","difficulty":"Hard","topic":"CTE + DENSE_RANK","prompt":"Calculate each salesperson's total revenue within each region, rank salespeople inside the region, and return only the top 2 per region.","tables":["employees","sales"],"hint":"First aggregate revenue by employee and region. Then rank that aggregated result.","sql":"WITH r AS (SELECT s.region,e.employee_id,e.employee_name,SUM(s.net_amount) AS revenue FROM sales s JOIN employees e ON s.employee_id=e.employee_id GROUP BY s.region,e.employee_id,e.employee_name), ranked AS (SELECT r.*,DENSE_RANK() OVER(PARTITION BY region ORDER BY revenue DESC) AS rnk FROM r) SELECT region,employee_id,employee_name,revenue,rnk FROM ranked WHERE rnk<=2 ORDER BY region,rnk,employee_name;","columns":["region","employee_id","employee_name","revenue","rnk"],"expected":[["South",3,"Vikram Singh",142400.0,1],["South",9,"Mohan Reddy",90000.0,2],["West",9,"Mohan Reddy",138000.0,1],["West",4,"Sneha Patel",27000.0,2]]},{"id":"SQL33","title":"Orders above the customer's average order value","difficulty":"Hard","topic":"Correlated Subquery","prompt":"Return orders whose total_amount is greater than that customer's average order amount across all their orders. Return order_id, customer_id and total_amount.","tables":["orders"],"hint":"Compare each order to AVG(total_amount) for the same customer.","sql":"SELECT o.order_id,o.customer_id,o.total_amount FROM orders o WHERE o.total_amount>(SELECT AVG(x.total_amount) FROM orders x WHERE x.customer_id=o.customer_id) ORDER BY o.customer_id,o.total_amount DESC;","columns":["order_id","customer_id","total_amount"],"expected":[[1001,1,87400.0],[1002,2,25200.0],[1013,3,88000.0],[1014,4,22000.0]]},{"id":"SQL34","title":"Customers with both an order and a successful payment","difficulty":"Medium","topic":"EXISTS","prompt":"Return customers who have at least one order and at least one successful transaction. Return unique customer_id and customer_name.","tables":["customers","orders","transactions"],"hint":"EXISTS can express both conditions without multiplying rows.","sql":"SELECT c.customer_id,c.customer_name FROM customers c WHERE EXISTS(SELECT 1 FROM orders o WHERE o.customer_id=c.customer_id) AND EXISTS(SELECT 1 FROM transactions t WHERE t.customer_id=c.customer_id AND t.status='Success') ORDER BY c.customer_id;","columns":["customer_id","customer_name"],"expected":[[1,"Amit Sharma"],[2,"Bhavna Rao"],[4,"Deepa Singh"],[5,"Esha Patel"],[6,"Farhan Ali"],[7,"Geeta Rao"],[8,"Hari Kumar"],[9,"Isha Das"],[10,"John Peter"]]},{"id":"SQL35","title":"Employees hired in the same year as their manager","difficulty":"Medium","topic":"Self Join + Date","prompt":"Find employees whose hire year is the same as their manager's hire year. Return employee_name, employee_hire_date and manager_name.","tables":["employees","managers"],"hint":"Join on manager_id and compare the year portions of the dates.","sql":"SELECT e.employee_name,e.hire_date AS employee_hire_date,m.manager_name,m.hire_date AS manager_hire_date FROM employees e JOIN managers m ON e.manager_id=m.manager_id WHERE substr(e.hire_date,1,4)=substr(m.hire_date,1,4) ORDER BY e.employee_id;","columns":["employee_name","employee_hire_date","manager_name","manager_hire_date"],"expected":[]},{"id":"SQL36","title":"Department with the highest headcount","difficulty":"Easy","topic":"GROUP BY + LIMIT","prompt":"Find the department with the highest number of employees. Return department_name and employee_count.","tables":["departments","employees"],"hint":"Count employees by department and sort descending.","sql":"SELECT d.department_name,COUNT(e.employee_id) AS employee_count FROM departments d JOIN employees e ON d.department_id=e.department_id GROUP BY d.department_id,d.department_name ORDER BY employee_count DESC,d.department_name LIMIT 1;","columns":["department_name","employee_count"],"expected":[["Data Engineering",4]]},{"id":"SQL37","title":"First and latest order date per customer","difficulty":"Medium","topic":"MIN/MAX","prompt":"For every customer who has ordered, return customer_id, first_order_date and latest_order_date.","tables":["customers","orders"],"hint":"GROUP BY customer_id and use MIN/MAX on order_date.","sql":"SELECT c.customer_id,MIN(o.order_date) AS first_order_date,MAX(o.order_date) AS latest_order_date FROM customers c JOIN orders o ON c.customer_id=o.customer_id GROUP BY c.customer_id ORDER BY c.customer_id;","columns":["customer_id","first_order_date","latest_order_date"],"expected":[[1,"2024-01-05","2024-06-18"],[2,"2024-01-10","2024-07-09"],[3,"2024-02-03","2024-07-20"],[4,"2024-02-15","2024-08-03"],[5,"2024-03-01","2024-03-01"],[6,"2024-03-18","2024-03-18"],[7,"2024-04-05","2024-04-05"],[8,"2024-04-21","2024-04-21"],[9,"2024-05-11","2024-05-11"],[10,"2024-06-02","2024-06-02"]]},{"id":"SQL38","title":"Compare stored order total with item-derived total","difficulty":"Hard","topic":"JOIN + Aggregation","prompt":"Find orders where the stored orders.total_amount differs from the total calculated from order_items by more than 1. Return order_id, stored_total, calculated_total and difference.","tables":["orders","order_items"],"hint":"Aggregate item totals first, then compare the result with orders.total_amount.","sql":"WITH x AS (SELECT order_id,ROUND(SUM(quantity*unit_price*(1-discount_pct/100.0)),2) AS calculated_total FROM order_items GROUP BY order_id) SELECT o.order_id,o.total_amount AS stored_total,x.calculated_total,ROUND(o.total_amount-x.calculated_total,2) AS difference FROM orders o JOIN x ON o.order_id=x.order_id WHERE ABS(o.total_amount-x.calculated_total)>1 ORDER BY o.order_id;","columns":["order_id","stored_total","calculated_total","difference"],"expected":[[1002,25200.0,24500.0,700.0],[1006,36500.0,36000.0,500.0],[1008,102000.0,95000.0,7000.0],[1010,27000.0,27400.0,-400.0],[1012,17000.0,15600.0,1400.0],[1013,88000.0,85000.0,3000.0]]},{"id":"SQL39","title":"Latest salary record for each employee","difficulty":"Medium","topic":"ROW_NUMBER","prompt":"From salaries, return only the latest salary record for each employee. Return employee_id, salary, effective_from and effective_to.","tables":["salaries"],"hint":"ROW_NUMBER partitioned by employee_id ordered by effective_from DESC.","sql":"SELECT employee_id,salary,effective_from,effective_to FROM (SELECT s.*,ROW_NUMBER() OVER(PARTITION BY employee_id ORDER BY effective_from DESC) rn FROM salaries s) x WHERE rn=1 ORDER BY employee_id;","columns":["employee_id","salary","effective_from","effective_to"],"expected":[[1,1500000.0,"2025-01-01",null],[2,1100000.0,"2024-01-01",null],[3,700000.0,"2024-01-01",null]]},{"id":"SQL40","title":"Three highest order values with ties","difficulty":"Hard","topic":"DENSE_RANK","prompt":"Return every order whose total_amount belongs to the top 3 distinct order values. If multiple orders share the same amount, include all of them.","tables":["orders"],"hint":"DENSE_RANK over total_amount DESC gives the required distinct-value ranking.","sql":"SELECT order_id,customer_id,total_amount,order_value_rank FROM (SELECT order_id,customer_id,total_amount,DENSE_RANK() OVER(ORDER BY total_amount DESC) AS order_value_rank FROM orders) x WHERE order_value_rank<=3 ORDER BY order_value_rank,order_id;","columns":["order_id","customer_id","total_amount","order_value_rank"],"expected":[[1008,8,102000.0,1],[1013,3,88000.0,2],[1001,1,87400.0,3]]},{"id":"SQL41","title":"Employees by department","difficulty":"Easy","topic":"SELECT + WHERE","prompt":"Return employee_name, department_id, and salary for employees in departments 1 or 2. Sort by department_id and salary descending.","tables":["employees"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT employee_name, department_id, salary FROM employees WHERE department_id IN (1,2) ORDER BY department_id, salary DESC;","columns":["employee_name","department_id","salary"],"expected":[["Arjun Rao",1,1500000.0],["Meena Das",1,1100000.0],["Anita Singh",1,950000.0],["Ramesh",1,900000.0],["Mohan Reddy",2,1200000.0],["Sneha Patel",2,760000.0],["Vikram Singh",2,700000.0],["Pooja",2,620000.0]]},{"id":"SQL42","title":"High salary employees","difficulty":"Easy","topic":"WHERE","prompt":"Return employee_name and salary for employees earning at least 1000000. Sort by salary descending.","tables":["employees"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT employee_name, salary FROM employees WHERE salary >= 1000000 ORDER BY salary DESC, employee_name;","columns":["employee_name","salary"],"expected":[["Arjun Rao",1500000.0],["Mohan Reddy",1200000.0],["Meena Das",1100000.0]]},{"id":"SQL43","title":"Employees from Hyderabad","difficulty":"Easy","topic":"Filtering","prompt":"Return employee_name, job_title, and city for employees whose city is Hyderabad.","tables":["employees"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT employee_name, job_title, city FROM employees WHERE city='Hyderabad' ORDER BY employee_name;","columns":["employee_name","job_title","city"],"expected":[["Anita Singh","Data Engineer","Hyderabad"],["Arjun Rao","Senior Data Engineer","Hyderabad"],["Meena Das","Data Engineer","Hyderabad"],["Ramesh","Data Engineer","Hyderabad"],["Ravi Kumar","HR Analyst","Hyderabad"]]},{"id":"SQL44","title":"Active employees hired after 2021","difficulty":"Easy","topic":"Date filtering","prompt":"Return employee_name and hire_date for active employees hired after 2021-12-31.","tables":["employees"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT employee_name, hire_date FROM employees WHERE status='Active' AND hire_date>'2021-12-31' ORDER BY hire_date;","columns":["employee_name","hire_date"],"expected":[["Vikram Singh","2022-03-12"],["Anita Singh","2022-11-07"],["Divya Rao","2023-01-12"],["Ramesh","2023-04-10"],["Lakshmi Devi","2024-02-10"],["Pooja","2024-05-11"]]},{"id":"SQL45","title":"Employees without managers","difficulty":"Easy","topic":"NULL","prompt":"Return employee_name and manager_id for employees who do not have a manager.","tables":["employees"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT employee_name, manager_id FROM employees WHERE manager_id IS NULL ORDER BY employee_name;","columns":["employee_name","manager_id"],"expected":[["Lakshmi Devi",null]]},{"id":"SQL46","title":"Count employees by city","difficulty":"Easy","topic":"GROUP BY","prompt":"Return each city and the number of employees in that city. Sort by employee_count descending and city ascending.","tables":["employees"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT city, COUNT(*) AS employee_count FROM employees GROUP BY city ORDER BY employee_count DESC, city;","columns":["city","employee_count"],"expected":[["Hyderabad",5],["Bangalore",3],["Mumbai",2],["Chennai",1],["Pune",1]]},{"id":"SQL47","title":"Average salary by department","difficulty":"Easy","topic":"GROUP BY","prompt":"Return department_id and average salary for each department, rounded to two decimals.","tables":["employees"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT department_id, ROUND(AVG(salary),2) AS avg_salary FROM employees GROUP BY department_id ORDER BY department_id;","columns":["department_id","avg_salary"],"expected":[[1,1112500.0],[2,820000.0],[3,650000.0],[4,800000.0],[5,720000.0],[6,680000.0]]},{"id":"SQL48","title":"Departments with average salary above 900000","difficulty":"Medium","topic":"HAVING","prompt":"Return department_id and average salary for departments whose average salary is greater than 900000.","tables":["employees"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT department_id, ROUND(AVG(salary),2) AS avg_salary FROM employees GROUP BY department_id HAVING AVG(salary)>900000 ORDER BY department_id;","columns":["department_id","avg_salary"],"expected":[[1,1112500.0]]},{"id":"SQL49","title":"Department headcount and payroll","difficulty":"Medium","topic":"GROUP BY","prompt":"Return department_id, employee_count, and total_salary for every department. Include only departments having employees.","tables":["employees"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT department_id, COUNT(*) AS employee_count, SUM(salary) AS total_salary FROM employees GROUP BY department_id ORDER BY department_id;","columns":["department_id","employee_count","total_salary"],"expected":[[1,4,4450000.0],[2,4,3280000.0],[3,1,650000.0],[4,1,800000.0],[5,1,720000.0],[6,1,680000.0]]},{"id":"SQL50","title":"Employees with department name","difficulty":"Easy","topic":"INNER JOIN","prompt":"Return employee_name, department_name, and salary for every employee.","tables":["employees","departments"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT e.employee_name,d.department_name,e.salary FROM employees e JOIN departments d ON e.department_id=d.department_id ORDER BY e.employee_name;","columns":["employee_name","department_name","salary"],"expected":[["Anita Singh","Data Engineering",950000.0],["Arjun Rao","Data Engineering",1500000.0],["Divya Rao","Finance",800000.0],["Lakshmi Devi","Marketing",680000.0],["Meena Das","Data Engineering",1100000.0],["Mohan Reddy","Sales",1200000.0],["Pooja","Sales",620000.0],["Ramesh","Data Engineering",900000.0],["Ravi Kumar","HR",650000.0],["Sneha Patel","Sales",760000.0],["Suresh Babu","IT Support",720000.0],["Vikram Singh","Sales",700000.0]]},{"id":"SQL51","title":"All departments with employee count","difficulty":"Medium","topic":"LEFT JOIN","prompt":"Return every department with its employee count, including departments with zero employees.","tables":["departments","employees"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT d.department_id,d.department_name,COUNT(e.employee_id) AS employee_count FROM departments d LEFT JOIN employees e ON d.department_id=e.department_id GROUP BY d.department_id,d.department_name ORDER BY d.department_id;","columns":["department_id","department_name","employee_count"],"expected":[[1,"Data Engineering",4],[2,"Sales",4],[3,"HR",1],[4,"Finance",1],[5,"IT Support",1],[6,"Marketing",1]]},{"id":"SQL52","title":"Employee and manager names","difficulty":"Medium","topic":"Self JOIN","prompt":"Return each employee_name and their manager_name. Keep employees without managers.","tables":["employees","managers"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT e.employee_name,m.manager_name FROM employees e LEFT JOIN managers m ON e.manager_id=m.manager_id ORDER BY e.employee_name;","columns":["employee_name","manager_name"],"expected":[["Anita Singh","Anil Kumar"],["Arjun Rao","Anil Kumar"],["Divya Rao","Neha Reddy"],["Lakshmi Devi",null],["Meena Das","Anil Kumar"],["Mohan Reddy","Priya Sharma"],["Pooja","Priya Sharma"],["Ramesh","Anil Kumar"],["Ravi Kumar","Rahul Verma"],["Sneha Patel","Priya Sharma"],["Suresh Babu","Kiran Rao"],["Vikram Singh","Priya Sharma"]]},{"id":"SQL53","title":"Managers earning more than average employee salary","difficulty":"Medium","topic":"JOIN + Subquery","prompt":"Return manager_name and salary for managers whose salary is greater than the average employee salary.","tables":["managers","employees"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT m.manager_name,m.salary FROM managers m WHERE m.salary>(SELECT AVG(salary) FROM employees) ORDER BY m.salary DESC;","columns":["manager_name","salary"],"expected":[["Anil Kumar",1800000.0],["Neha Reddy",1700000.0],["Priya Sharma",1600000.0],["Rahul Verma",1500000.0],["Kiran Rao",1400000.0]]},{"id":"SQL54","title":"Customers with orders","difficulty":"Easy","topic":"JOIN","prompt":"Return customer_name, order_id, and order_date for customers who placed orders.","tables":["customers","orders"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT c.customer_name,o.order_id,o.order_date FROM customers c JOIN orders o ON c.customer_id=o.customer_id ORDER BY o.order_date,o.order_id;","columns":["customer_name","order_id","order_date"],"expected":[["Amit Sharma",1001,"2024-01-05"],["Bhavna Rao",1002,"2024-01-10"],["Chandra Kumar",1003,"2024-02-03"],["Deepa Singh",1004,"2024-02-15"],["Esha Patel",1005,"2024-03-01"],["Farhan Ali",1006,"2024-03-18"],["Geeta Rao",1007,"2024-04-05"],["Hari Kumar",1008,"2024-04-21"],["Isha Das",1009,"2024-05-11"],["John Peter",1010,"2024-06-02"],["Amit Sharma",1011,"2024-06-18"],["Bhavna Rao",1012,"2024-07-09"],["Chandra Kumar",1013,"2024-07-20"],["Deepa Singh",1014,"2024-08-03"]]},{"id":"SQL55","title":"Transactions by payment method","difficulty":"Easy","topic":"GROUP BY","prompt":"Return payment_method and transaction_count.","tables":["transactions"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT payment_method,COUNT(*) AS transaction_count FROM transactions GROUP BY payment_method ORDER BY transaction_count DESC,payment_method;","columns":["payment_method","transaction_count"],"expected":[["Card",6],["UPI",5],["NetBanking",1]]},{"id":"SQL56","title":"Order count per customer","difficulty":"Easy","topic":"GROUP BY + JOIN","prompt":"Return customer_name and order_count for every customer, including customers with zero orders.","tables":["customers","orders"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT c.customer_name,COUNT(o.order_id) AS order_count FROM customers c LEFT JOIN orders o ON c.customer_id=o.customer_id GROUP BY c.customer_id,c.customer_name ORDER BY order_count DESC,c.customer_name;","columns":["customer_name","order_count"],"expected":[["Amit Sharma",2],["Bhavna Rao",2],["Chandra Kumar",2],["Deepa Singh",2],["Esha Patel",1],["Farhan Ali",1],["Geeta Rao",1],["Hari Kumar",1],["Isha Das",1],["John Peter",1]]},{"id":"SQL57","title":"Successful transaction amount","difficulty":"Medium","topic":"CASE + GROUP BY","prompt":"Return transaction_type and successful_amount, considering only successful transactions.","tables":["transactions"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT transaction_type,ROUND(SUM(CASE WHEN status='Success' THEN amount ELSE 0 END),2) AS successful_amount FROM transactions GROUP BY transaction_type ORDER BY successful_amount DESC,transaction_type;","columns":["transaction_type","successful_amount"],"expected":[["Payment",400100.0],["Refund",5000.0]]},{"id":"SQL58","title":"Delivered order revenue by customer","difficulty":"Medium","topic":"JOIN + GROUP BY","prompt":"Return customer_name and delivered_revenue for customers, considering only delivered orders. Sort by revenue descending.","tables":["customers","orders"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT c.customer_name,COALESCE(SUM(CASE WHEN o.status='Delivered' THEN o.total_amount ELSE 0 END),0) AS delivered_revenue FROM customers c LEFT JOIN orders o ON c.customer_id=o.customer_id GROUP BY c.customer_id,c.customer_name ORDER BY delivered_revenue DESC,c.customer_name;","columns":["customer_name","delivered_revenue"],"expected":[["Amit Sharma",112400.0],["Hari Kumar",102000.0],["Chandra Kumar",88000.0],["Esha Patel",50000.0],["Bhavna Rao",42200.0],["John Peter",27000.0],["Geeta Rao",18000.0],["Deepa Singh",12000.0],["Farhan Ali",0],["Isha Das",0]]},{"id":"SQL59","title":"Failed transactions","difficulty":"Easy","topic":"WHERE","prompt":"Return transaction_id, customer_id, amount for failed transactions.","tables":["transactions"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT transaction_id,customer_id,amount FROM transactions WHERE status='Failed' ORDER BY transaction_id;","columns":["transaction_id","customer_id","amount"],"expected":[[3,3,22000.0]]},{"id":"SQL60","title":"Product profit per unit","difficulty":"Easy","topic":"Arithmetic","prompt":"Return product_name and profit_per_unit calculated as price minus cost. Sort by profit_per_unit descending.","tables":["products"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT product_name,ROUND(price-cost,2) AS profit_per_unit FROM products ORDER BY profit_per_unit DESC,product_name;","columns":["product_name","profit_per_unit"],"expected":[["Laptop Pro",23000.0],["Desk",7000.0],["Monitor 27",7000.0],["Printer",5500.0],["Office Chair",5000.0],["Headphones",2300.0],["Keyboard",1200.0],["USB Hub",900.0],["Wireless Mouse",600.0],["Notebook",180.0]]},{"id":"SQL61","title":"Products with profit margin above 30 percent","difficulty":"Medium","topic":"Arithmetic + WHERE","prompt":"Return product_name and profit_margin_pct for products whose margin is above 30 percent, calculated as (price-cost)/price*100.","tables":["products"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT product_name,ROUND((price-cost)*100.0/price,2) AS profit_margin_pct FROM products WHERE price>0 AND (price-cost)*100.0/price>30 ORDER BY profit_margin_pct DESC,product_name;","columns":["product_name","profit_margin_pct"],"expected":[["Notebook",60.0],["USB Hub",50.0],["Wireless Mouse",50.0],["Keyboard",48.0],["Headphones",46.0],["Office Chair",41.67],["Desk",38.89],["Printer",34.38],["Monitor 27",31.82]]},{"id":"SQL62","title":"Revenue by product category","difficulty":"Medium","topic":"JOIN + GROUP BY","prompt":"Return each product category and total ordered revenue using quantity multiplied by unit_price after discount.","tables":["products","order_items"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT p.category,ROUND(SUM(oi.quantity*oi.unit_price*(1-oi.discount_pct/100.0)),2) AS revenue FROM products p JOIN order_items oi ON p.product_id=oi.product_id GROUP BY p.category ORDER BY revenue DESC,p.category;","columns":["category","revenue"],"expected":[["Electronics",437900.0],["Furniture",78000.0],["Accessories",9000.0]]},{"id":"SQL63","title":"Best selling product by quantity","difficulty":"Medium","topic":"GROUP BY + LIMIT","prompt":"Return the product_name and total_quantity for the product with the highest total quantity sold.","tables":["products","order_items"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT p.product_name,SUM(oi.quantity) AS total_quantity FROM products p JOIN order_items oi ON p.product_id=oi.product_id GROUP BY p.product_id,p.product_name ORDER BY total_quantity DESC,p.product_id LIMIT 1;","columns":["product_name","total_quantity"],"expected":[["Headphones",13]]},{"id":"SQL64","title":"Products never ordered","difficulty":"Medium","topic":"LEFT JOIN","prompt":"Return products that have never appeared in order_items.","tables":["products","order_items"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT p.product_id,p.product_name FROM products p LEFT JOIN order_items oi ON p.product_id=oi.product_id WHERE oi.product_id IS NULL ORDER BY p.product_id;","columns":["product_id","product_name"],"expected":[[109,"Notebook"],[110,"Printer"]]},{"id":"SQL65","title":"Order calculated total vs stored total","difficulty":"Medium","topic":"JOIN + calculation","prompt":"Return order_id, stored total_amount, and calculated_total from order_items using quantity, unit_price and discount_pct.","tables":["orders","order_items"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT o.order_id,o.total_amount,ROUND(SUM(oi.quantity*oi.unit_price*(1-oi.discount_pct/100.0)),2) AS calculated_total FROM orders o JOIN order_items oi ON o.order_id=oi.order_id GROUP BY o.order_id,o.total_amount ORDER BY o.order_id;","columns":["order_id","total_amount","calculated_total"],"expected":[[1001,87400.0,87400.0],[1002,25200.0,24500.0],[1003,22000.0,22000.0],[1004,12000.0,12000.0],[1005,50000.0,50000.0],[1006,36500.0,36000.0],[1007,18000.0,18000.0],[1008,102000.0,95000.0],[1009,5000.0,5000.0],[1010,27000.0,27400.0],[1011,25000.0,25000.0],[1012,17000.0,15600.0],[1013,88000.0,85000.0],[1014,22000.0,22000.0]]},{"id":"SQL66","title":"Orders with more than 3 items","difficulty":"Medium","topic":"GROUP BY + HAVING","prompt":"Return order_id and total_item_quantity for orders whose total item quantity is greater than 3.","tables":["order_items"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT order_id,SUM(quantity) AS total_item_quantity FROM order_items GROUP BY order_id HAVING SUM(quantity)>3 ORDER BY total_item_quantity DESC,order_id;","columns":["order_id","total_item_quantity"],"expected":[[1005,10],[1011,10],[1010,4]]},{"id":"SQL67","title":"Latest order for each customer","difficulty":"Hard","topic":"Correlated subquery","prompt":"Return customer_id, order_id, and order_date for each customer's latest order.","tables":["orders"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT o.customer_id,o.order_id,o.order_date FROM orders o WHERE o.order_date=(SELECT MAX(x.order_date) FROM orders x WHERE x.customer_id=o.customer_id) ORDER BY o.customer_id,o.order_id;","columns":["customer_id","order_id","order_date"],"expected":[[1,1011,"2024-06-18"],[2,1012,"2024-07-09"],[3,1013,"2024-07-20"],[4,1014,"2024-08-03"],[5,1005,"2024-03-01"],[6,1006,"2024-03-18"],[7,1007,"2024-04-05"],[8,1008,"2024-04-21"],[9,1009,"2024-05-11"],[10,1010,"2024-06-02"]]},{"id":"SQL68","title":"Second highest distinct salary","difficulty":"Medium","topic":"Subquery","prompt":"Return the second highest distinct employee salary.","tables":["employees"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT MAX(salary) AS second_highest_salary FROM employees WHERE salary<(SELECT MAX(salary) FROM employees);","columns":["second_highest_salary"],"expected":[[1200000.0]]},{"id":"SQL69","title":"Top 3 salaries","difficulty":"Easy","topic":"DISTINCT + LIMIT","prompt":"Return the top three distinct employee salaries in descending order.","tables":["employees"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT DISTINCT salary FROM employees ORDER BY salary DESC LIMIT 3;","columns":["salary"],"expected":[[1500000.0],[1200000.0],[1100000.0]]},{"id":"SQL70","title":"Employees tied for highest salary","difficulty":"Medium","topic":"Subquery","prompt":"Return employee_name and salary for every employee tied for the highest salary.","tables":["employees"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT employee_name,salary FROM employees WHERE salary=(SELECT MAX(salary) FROM employees) ORDER BY employee_name;","columns":["employee_name","salary"],"expected":[["Arjun Rao",1500000.0]]},{"id":"SQL71","title":"Employees above company average","difficulty":"Medium","topic":"Subquery","prompt":"Return employee_name and salary for employees whose salary is above the company-wide average.","tables":["employees"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT employee_name,salary FROM employees WHERE salary>(SELECT AVG(salary) FROM employees) ORDER BY salary DESC,employee_name;","columns":["employee_name","salary"],"expected":[["Arjun Rao",1500000.0],["Mohan Reddy",1200000.0],["Meena Das",1100000.0],["Anita Singh",950000.0],["Ramesh",900000.0]]},{"id":"SQL72","title":"Department highest salary","difficulty":"Medium","topic":"Correlated subquery","prompt":"Return department_id, employee_name, and salary for the highest-paid employee(s) in each department.","tables":["employees"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT e.department_id,e.employee_name,e.salary FROM employees e WHERE e.salary=(SELECT MAX(x.salary) FROM employees x WHERE x.department_id=e.department_id) ORDER BY e.department_id,e.employee_name;","columns":["department_id","employee_name","salary"],"expected":[[1,"Arjun Rao",1500000.0],[2,"Mohan Reddy",1200000.0],[3,"Ravi Kumar",650000.0],[4,"Divya Rao",800000.0],[5,"Suresh Babu",720000.0],[6,"Lakshmi Devi",680000.0]]},{"id":"SQL73","title":"Top 2 earners per department","difficulty":"Hard","topic":"Window Function","prompt":"Return employee_name, department_id, salary, and salary_rank for the top two earners in each department using DENSE_RANK.","tables":["employees"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT employee_name,department_id,salary,salary_rank FROM (SELECT employee_name,department_id,salary,DENSE_RANK() OVER(PARTITION BY department_id ORDER BY salary DESC) AS salary_rank FROM employees) x WHERE salary_rank<=2 ORDER BY department_id,salary_rank,employee_name;","columns":["employee_name","department_id","salary","salary_rank"],"expected":[["Arjun Rao",1,1500000.0,1],["Meena Das",1,1100000.0,2],["Mohan Reddy",2,1200000.0,1],["Sneha Patel",2,760000.0,2],["Ravi Kumar",3,650000.0,1],["Divya Rao",4,800000.0,1],["Suresh Babu",5,720000.0,1],["Lakshmi Devi",6,680000.0,1]]},{"id":"SQL74","title":"Employee salary rank in department","difficulty":"Hard","topic":"Window Function","prompt":"Return employee_name, department_id, salary, and DENSE_RANK salary rank within each department.","tables":["employees"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT employee_name,department_id,salary,DENSE_RANK() OVER(PARTITION BY department_id ORDER BY salary DESC) AS salary_rank FROM employees ORDER BY department_id,salary_rank,employee_name;","columns":["employee_name","department_id","salary","salary_rank"],"expected":[["Arjun Rao",1,1500000.0,1],["Meena Das",1,1100000.0,2],["Anita Singh",1,950000.0,3],["Ramesh",1,900000.0,4],["Mohan Reddy",2,1200000.0,1],["Sneha Patel",2,760000.0,2],["Vikram Singh",2,700000.0,3],["Pooja",2,620000.0,4],["Ravi Kumar",3,650000.0,1],["Divya Rao",4,800000.0,1],["Suresh Babu",5,720000.0,1],["Lakshmi Devi",6,680000.0,1]]},{"id":"SQL75","title":"Department salary running total","difficulty":"Hard","topic":"Window Function","prompt":"Return employee_name, department_id, salary, and the running salary total within each department ordered by salary descending.","tables":["employees"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT employee_name,department_id,salary,SUM(salary) OVER(PARTITION BY department_id ORDER BY salary DESC,employee_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_salary FROM employees ORDER BY department_id,salary DESC,employee_id;","columns":["employee_name","department_id","salary","running_salary"],"expected":[["Arjun Rao",1,1500000.0,1500000.0],["Meena Das",1,1100000.0,2600000.0],["Anita Singh",1,950000.0,3550000.0],["Ramesh",1,900000.0,4450000.0],["Mohan Reddy",2,1200000.0,1200000.0],["Sneha Patel",2,760000.0,1960000.0],["Vikram Singh",2,700000.0,2660000.0],["Pooja",2,620000.0,3280000.0],["Ravi Kumar",3,650000.0,650000.0],["Divya Rao",4,800000.0,800000.0],["Suresh Babu",5,720000.0,720000.0],["Lakshmi Devi",6,680000.0,680000.0]]},{"id":"SQL76","title":"Previous salary in SCD2","difficulty":"Hard","topic":"LAG","prompt":"For employee_scd2, return employee_id, effective_from, salary, and previous_salary using LAG ordered by effective_from.","tables":["employee_scd2"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT employee_id,effective_from,salary,LAG(salary) OVER(PARTITION BY employee_id ORDER BY effective_from) AS previous_salary FROM employee_scd2 ORDER BY employee_id,effective_from;","columns":["employee_id","effective_from","salary","previous_salary"],"expected":[[1,"2021-01-01",900000.0,null],[1,"2023-01-01",1200000.0,900000.0],[2,"2021-06-15",900000.0,null],[2,"2024-01-01",1100000.0,900000.0],[3,"2022-03-12",600000.0,null],[3,"2024-01-01",700000.0,600000.0],[4,"2021-09-01",650000.0,null]]},{"id":"SQL77","title":"Current SCD2 employee records","difficulty":"Easy","topic":"SCD Type 2","prompt":"Return all current employee_scd2 records where is_current indicates the active version.","tables":["employee_scd2"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT employee_id,department_id,job_title,salary,effective_from,effective_to FROM employee_scd2 WHERE is_current=1 ORDER BY employee_id;","columns":["employee_id","department_id","job_title","salary","effective_from","effective_to"],"expected":[[1,1,"Senior Data Engineer",1200000.0,"2023-01-01",null],[2,1,"Senior Data Engineer",1100000.0,"2024-01-01",null],[3,2,"Sales Executive",700000.0,"2024-01-01",null],[4,2,"Sales Executive",650000.0,"2021-09-01",null]]},{"id":"SQL78","title":"SCD2 employees with department changes","difficulty":"Hard","topic":"SCD Type 2","prompt":"Return employee_id values that have more than one SCD2 record.","tables":["employee_scd2"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT employee_id,COUNT(*) AS version_count FROM employee_scd2 GROUP BY employee_id HAVING COUNT(*)>1 ORDER BY employee_id;","columns":["employee_id","version_count"],"expected":[[1,2],[2,2],[3,2]]},{"id":"SQL79","title":"SCD2 salary changes","difficulty":"Hard","topic":"Window + LAG","prompt":"Return employee_id, effective_from, salary, and salary_change from the previous SCD2 salary.","tables":["employee_scd2"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT employee_id,effective_from,salary,salary-LAG(salary) OVER(PARTITION BY employee_id ORDER BY effective_from) AS salary_change FROM employee_scd2 ORDER BY employee_id,effective_from;","columns":["employee_id","effective_from","salary","salary_change"],"expected":[[1,"2021-01-01",900000.0,null],[1,"2023-01-01",1200000.0,300000.0],[2,"2021-06-15",900000.0,null],[2,"2024-01-01",1100000.0,200000.0],[3,"2022-03-12",600000.0,null],[3,"2024-01-01",700000.0,100000.0],[4,"2021-09-01",650000.0,null]]},{"id":"SQL80","title":"Latest employee sales history","difficulty":"Medium","topic":"SCD Type 2","prompt":"Return the current sales target and region for each employee from employee_sales_history.","tables":["employee_sales_history"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT employee_id,sales_target,region FROM employee_sales_history WHERE is_current=1 ORDER BY employee_id;","columns":["employee_id","sales_target","region"],"expected":[[3,1000000.0,"South"],[4,900000.0,"West"],[9,1200000.0,"West"]]},{"id":"SQL81","title":"Employees whose sales target increased","difficulty":"Hard","topic":"LAG","prompt":"Return employee_id and the old/new sales target where a later sales-history record has a higher target than the previous version.","tables":["employee_sales_history"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT employee_id,effective_from,sales_target,LAG(sales_target) OVER(PARTITION BY employee_id ORDER BY effective_from) AS previous_target FROM employee_sales_history ORDER BY employee_id,effective_from;","columns":["employee_id","effective_from","sales_target","previous_target"],"expected":[[3,"2023-01-01",800000.0,null],[3,"2024-01-01",1000000.0,800000.0],[4,"2023-01-01",750000.0,null],[4,"2024-04-01",900000.0,750000.0],[9,"2023-01-01",1200000.0,null]]},{"id":"SQL82","title":"Duplicate customer emails","difficulty":"Easy","topic":"Duplicates","prompt":"Return duplicate email values and their counts from duplicate_customers.","tables":["duplicate_customers"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT email,COUNT(*) AS duplicate_count FROM duplicate_customers GROUP BY email HAVING COUNT(*)>1 ORDER BY duplicate_count DESC,email;","columns":["email","duplicate_count"],"expected":[["amit@gmail.com",2],["bhavna@gmail.com",2]]},{"id":"SQL83","title":"Latest duplicate customer record","difficulty":"Hard","topic":"ROW_NUMBER","prompt":"For duplicate_customers, return the latest record for each email using ROW_NUMBER.","tables":["duplicate_customers"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT record_id,customer_name,email,created_at FROM (SELECT d.*,ROW_NUMBER() OVER(PARTITION BY email ORDER BY created_at DESC,record_id DESC) AS rn FROM duplicate_customers d) x WHERE rn=1 ORDER BY email;","columns":["record_id","customer_name","email","created_at"],"expected":[[2,"Amit Sharma","amit@gmail.com","2024-01-02"],[4,"Bhavna Rao","bhavna@gmail.com","2024-01-04"],[6,"Chandra Kumar","chandra2@gmail.com","2024-01-06"],[5,"Chandra Kumar","chandra@gmail.com","2024-01-05"],[7,"Deepa Singh","deepa@gmail.com","2024-01-07"]]},{"id":"SQL84","title":"First duplicate customer record","difficulty":"Hard","topic":"ROW_NUMBER","prompt":"For duplicate_customers, return the first record for each email using ROW_NUMBER.","tables":["duplicate_customers"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT record_id,customer_name,email,created_at FROM (SELECT d.*,ROW_NUMBER() OVER(PARTITION BY email ORDER BY created_at,record_id) AS rn FROM duplicate_customers d) x WHERE rn=1 ORDER BY email;","columns":["record_id","customer_name","email","created_at"],"expected":[[1,"Amit Sharma","amit@gmail.com","2024-01-01"],[3,"Bhavna Rao","bhavna@gmail.com","2024-01-03"],[6,"Chandra Kumar","chandra2@gmail.com","2024-01-06"],[5,"Chandra Kumar","chandra@gmail.com","2024-01-05"],[7,"Deepa Singh","deepa@gmail.com","2024-01-07"]]},{"id":"SQL85","title":"Customer city counts","difficulty":"Easy","topic":"GROUP BY","prompt":"Return city and customer_count from customers, sorted by customer_count descending.","tables":["customers"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT city,COUNT(*) AS customer_count FROM customers GROUP BY city ORDER BY customer_count DESC,city;","columns":["city","customer_count"],"expected":[["Hyderabad",3],["Bangalore",2],["Mumbai",2],["Pune",2],["Chennai",1]]},{"id":"SQL86","title":"Customers by segment","difficulty":"Easy","topic":"GROUP BY","prompt":"Return segment and customer_count from customers.","tables":["customers"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT segment,COUNT(*) AS customer_count FROM customers GROUP BY segment ORDER BY customer_count DESC,segment;","columns":["segment","customer_count"],"expected":[["Retail",6],["Corporate",4]]},{"id":"SQL87","title":"Latest signup per city","difficulty":"Medium","topic":"GROUP BY","prompt":"Return city and latest signup_date for each customer city.","tables":["customers"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT city,MAX(signup_date) AS latest_signup_date FROM customers GROUP BY city ORDER BY city;","columns":["city","latest_signup_date"],"expected":[["Bangalore","2024-02-20"],["Chennai","2023-06-17"],["Hyderabad","2024-01-05"],["Mumbai","2024-04-02"],["Pune","2024-06-19"]]},{"id":"SQL88","title":"Order status summary","difficulty":"Easy","topic":"GROUP BY","prompt":"Return order status and order_count.","tables":["orders"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT status,COUNT(*) AS order_count FROM orders GROUP BY status ORDER BY order_count DESC,status;","columns":["status","order_count"],"expected":[["Delivered",10],["Cancelled",1],["Pending",1],["Returned",1],["Shipped",1]]},{"id":"SQL89","title":"Revenue by order status","difficulty":"Medium","topic":"GROUP BY","prompt":"Return order status and total_amount for each status.","tables":["orders"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT status,ROUND(SUM(total_amount),2) AS total_amount FROM orders GROUP BY status ORDER BY total_amount DESC,status;","columns":["status","total_amount"],"expected":[["Delivered",451600.0],["Shipped",36500.0],["Cancelled",22000.0],["Pending",22000.0],["Returned",5000.0]]},{"id":"SQL90","title":"Monthly order revenue","difficulty":"Medium","topic":"Date functions","prompt":"Return year-month and total order revenue using order_date. Sort chronologically.","tables":["orders"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT strftime('%Y-%m',order_date) AS year_month,ROUND(SUM(total_amount),2) AS revenue FROM orders GROUP BY year_month ORDER BY year_month;","columns":["year_month","revenue"],"expected":[["2024-01",112600.0],["2024-02",34000.0],["2024-03",86500.0],["2024-04",120000.0],["2024-05",5000.0],["2024-06",52000.0],["2024-07",105000.0],["2024-08",22000.0]]},{"id":"SQL91","title":"Orders in a date range","difficulty":"Easy","topic":"Date filtering","prompt":"Return orders placed between 2024-01-01 and 2024-12-31 inclusive.","tables":["orders"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT order_id,customer_id,order_date,total_amount FROM orders WHERE order_date BETWEEN '2024-01-01' AND '2024-12-31' ORDER BY order_date,order_id;","columns":["order_id","customer_id","order_date","total_amount"],"expected":[[1001,1,"2024-01-05",87400.0],[1002,2,"2024-01-10",25200.0],[1003,3,"2024-02-03",22000.0],[1004,4,"2024-02-15",12000.0],[1005,5,"2024-03-01",50000.0],[1006,6,"2024-03-18",36500.0],[1007,7,"2024-04-05",18000.0],[1008,8,"2024-04-21",102000.0],[1009,9,"2024-05-11",5000.0],[1010,10,"2024-06-02",27000.0],[1011,1,"2024-06-18",25000.0],[1012,2,"2024-07-09",17000.0],[1013,3,"2024-07-20",88000.0],[1014,4,"2024-08-03",22000.0]]},{"id":"SQL92","title":"Weekend calendar dates","difficulty":"Easy","topic":"Calendar","prompt":"Return full_date, day_name for calendar dates marked as weekends.","tables":["date_calendar"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT full_date,day_name FROM date_calendar WHERE is_weekend=1 ORDER BY full_date;","columns":["full_date","day_name"],"expected":[["2024-01-06","Saturday"],["2024-01-07","Sunday"],["2024-06-01","Saturday"]]},{"id":"SQL93","title":"Quarterly calendar counts","difficulty":"Medium","topic":"Calendar","prompt":"Return year, quarter, and number of calendar dates in each quarter.","tables":["date_calendar"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT year,quarter,COUNT(*) AS day_count FROM date_calendar GROUP BY year,quarter ORDER BY year,quarter;","columns":["year","quarter","day_count"],"expected":[[2024,1,9],[2024,2,3],[2024,3,2]]},{"id":"SQL94","title":"Visits per patient","difficulty":"Easy","topic":"GROUP BY","prompt":"Return patient_id and visit_count for every patient with at least one visit.","tables":["visits"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT patient_id,COUNT(*) AS visit_count FROM visits GROUP BY patient_id ORDER BY visit_count DESC,patient_id;","columns":["patient_id","visit_count"],"expected":[[120,2],[121,2],[122,1],[123,1],[124,1],[125,1]]},{"id":"SQL95","title":"Patient total visit amount","difficulty":"Medium","topic":"GROUP BY","prompt":"Return patient_id and total_amount spent on visits.","tables":["visits"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT patient_id,ROUND(SUM(amount),2) AS total_amount FROM visits GROUP BY patient_id ORDER BY total_amount DESC,patient_id;","columns":["patient_id","total_amount"],"expected":[[120,2450.0],[123,2000.0],[121,1700.0],[124,800.0],[125,750.0],[122,700.0]]},{"id":"SQL96","title":"Employee sales total","difficulty":"Medium","topic":"JOIN + GROUP BY","prompt":"Return employee_id and total_net_sales from sales.","tables":["sales"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT employee_id,ROUND(SUM(net_amount),2) AS total_net_sales FROM sales GROUP BY employee_id ORDER BY total_net_sales DESC,employee_id;","columns":["employee_id","total_net_sales"],"expected":[[9,228000.0],[3,142400.0],[4,103000.0]]},{"id":"SQL97","title":"Latest visit per patient","difficulty":"Hard","topic":"ROW_NUMBER","prompt":"Return patient_id, visit_date, doctor for the latest visit of every patient who has visited.","tables":["visits"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT patient_id,visit_date,doctor FROM (SELECT v.*,ROW_NUMBER() OVER(PARTITION BY patient_id ORDER BY visit_date DESC,visit_id DESC) AS rn FROM visits v) x WHERE rn=1 ORDER BY patient_id;","columns":["patient_id","visit_date","doctor"],"expected":[[120,"2024-04-15","Dr Rao"],[121,"2024-05-01","Dr Mehta"],[122,"2024-02-10","Dr Rao"],[123,"2024-02-12","Dr Kumar"],[124,"2024-03-01","Dr Singh"],[125,"2024-03-10","Dr Mehta"]]},{"id":"SQL98","title":"Admission length","difficulty":"Medium","topic":"Date arithmetic","prompt":"Return admission_id, patient_id, and length_of_stay in days using admission_date and discharge_date.","tables":["admissions"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT admission_id,patient_id,CAST(julianday(discharge_date)-julianday(admission_date) AS INTEGER) AS length_of_stay FROM admissions ORDER BY admission_id;","columns":["admission_id","patient_id","length_of_stay"],"expected":[[1,120,3],[2,121,4],[3,122,1],[4,123,5],[5,124,2],[6,125,2],[7,120,5],[8,121,2]]},{"id":"SQL99","title":"Admissions by diagnosis","difficulty":"Easy","topic":"GROUP BY","prompt":"Return diagnosis and admission_count.","tables":["admissions"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT diagnosis,COUNT(*) AS admission_count FROM admissions GROUP BY diagnosis ORDER BY admission_count DESC,diagnosis;","columns":["diagnosis","admission_count"],"expected":[["Fever",2],["Flu",2],["Asthma",1],["Diabetes",1],["Fracture",1],["Migraine",1]]},{"id":"SQL100","title":"Patients with multiple admissions","difficulty":"Medium","topic":"GROUP BY","prompt":"Return patient_id and admission_count for patients with more than one admission.","tables":["admissions"],"hint":"Build the result step by step. Check the required columns, filtering, joins/aggregation, and ordering before submitting.","sql":"SELECT patient_id,COUNT(*) AS admission_count FROM admissions GROUP BY patient_id HAVING COUNT(*)>1 ORDER BY admission_count DESC,patient_id;","columns":["patient_id","admission_count"],"expected":[[120,2],[121,2]]}]};
+let questions=DATA.questions,tables=DATA.tables,current=0,solved=new Set();
+const $=x=>document.getElementById(x);
+function esc(v){return String(v===null?'NULL':v).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')}
+function closeModal(id){$(id).classList.add('hide')}
+function closeModalOnBackdrop(e,id){if(e.target.id===id)closeModal(id)}
+function openSettings(){loadSettings();$('settingsModal').classList.remove('hide')}
+function saveSettings(){localStorage.setItem('sqlPracticeAutoClear',$('settingAutoClear').checked?'1':'0');localStorage.setItem('sqlPracticeReq',$('settingReq').checked?'1':'0')}
+function loadSettings(){const a=$('settingAutoClear'),r=$('settingReq');if(a)a.checked=localStorage.getItem('sqlPracticeAutoClear')!=='0';if(r)r.checked=localStorage.getItem('sqlPracticeReq')!=='0'}
+function toggleRequired(){const s=$('requiredSection'),t=$('requiredToggle');s.classList.toggle('hide');t.textContent=s.classList.contains('hide')?'▸ Show Required Tables':'▾ Hide Required Tables'}
+function openDatabaseModal(table){$('databaseModal').classList.remove('hide');renderDatabaseModal(table||tables[0])}
+function renderDatabaseModal(selected){let search=($('datasetSearch').value||'').toLowerCase();let list=tables.filter(t=>t.toLowerCase().includes(search));if(!selected||!list.includes(selected))selected=list[0]||tables[0];let chips=list.map(t=>`<button class="dataset-chip ${t===selected?'active':''}" onclick="renderDatabaseModal('${t}')">${esc(t)}</button>`).join('');let d=DATA.data[selected],sc=DATA.schemas[selected];let h='<div class=dataset-tabs>'+chips+'</div><div class=catalog-detail><div class=catalog-detail-head>'+esc(selected)+' <span style="font-size:11px;color:#6b7280;font-weight:400">· '+sc.length+' columns · '+d.rows.length+' rows</span></div><div style="overflow:auto"><table><tr><th>Column</th><th>Type</th><th>Key</th></tr>'+sc.map(c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.type)}</td><td>${c.pk?'PRIMARY KEY':''}</td></tr>`).join('')+'</table></div><div class=catalog-preview><table><tr>'+d.columns.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr>'+d.rows.map(r=>'<tr>'+r.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')+'</table></div></div>';$('databaseModalBody').innerHTML=h}
+function openAllQuestions(){$('allQuestionsModal').classList.remove('hide');renderAllQuestionsModal()}
+function renderAllQuestionsModal(){let search=($('allQSearch').value||'').toLowerCase();let arr=questions.map((q,i)=>({q,i})).filter(x=>(x.q.id+' '+x.q.title+' '+x.q.topic+' '+x.q.difficulty).toLowerCase().includes(search));$('allQCount').textContent=arr.length+' of '+questions.length;$('allQBody').innerHTML=arr.map(x=>`<div class=allq onclick="closeModal('allQuestionsModal');loadQ(${x.i})"><strong>${esc(x.q.id)} · ${esc(x.q.title)}</strong><div>${esc(x.q.difficulty)} · ${esc(x.q.topic)}</div></div>`).join('')||'<div style="color:#6b7280">No questions found.</div>'}
+function renderTables(){let s=($('search').value||'').toLowerCase();$('dbmeta').textContent=tables.length+' tables';$('tables').innerHTML=tables.filter(t=>t.toLowerCase().includes(s)).map(t=>`<div class="catalog-table" onclick="showTable('${t}')"><span class=catalog-icon>▦</span><span class=catalog-name>${esc(t)}</span><span class=catalog-cols>${DATA.schemas[t].length} cols</span></div><div class=catalog-sub>${DATA.schemas[t].slice(0,4).map(c=>esc(c.name)).join(' · ')}${DATA.schemas[t].length>4?' · …':''}</div>`).join('')}
+function showTable(t){openDatabaseModal(t)}
+function renderQuestions(){let f=$('filter').value;let arr=questions.map((q,i)=>({q,i})).filter(x=>f==='All'||x.q.difficulty===f);$('count').textContent=arr.length;$('qbank').innerHTML=arr.map(x=>`<div class="qitem ${x.i===current?'active':''}" onclick="loadQ(${x.i})"><span style="color:#777">${x.q.id}</span> ${esc(x.q.title)} <span class=diff>${x.q.difficulty}</span></div>`).join('')}
+function loadQ(i){current=(i+questions.length)%questions.length;let q=questions[current];$('title').textContent=q.title;$('tags').innerHTML=`<span class=tag>${q.id}</span><span class=tag>${q.difficulty}</span><span class=tag>${esc(q.topic)}</span>`;$('prompt').textContent=q.prompt;$('req').innerHTML=q.tables.map(t=>`<span class=tag>${t}</span>`).join('');$('hint').textContent=q.hint;$('solutionText').textContent=q.sql;let sh='<div class=schema>';q.tables.forEach(t=>{sh+='<b style="font-size:12px">'+t+'</b><table><tr><th>Column</th><th>Type</th><th>Key</th></tr>'+DATA.schemas[t].map(c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.type)}</td><td>${c.pk?'PRIMARY KEY':''}</td></tr>`).join('')+'</table><br>'});$('schema').innerHTML=sh+'</div>';let h='<table><tr>'+q.columns.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr>';q.expected.forEach(r=>h+='<tr>'+r.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>');$('expectedTable').innerHTML=h+'</table>';['hint','expected','solution'].forEach(x=>$(x).classList.add('hide'));const hideReq=localStorage.getItem('sqlPracticeReq')!=='0';$('requiredSection').classList.toggle('hide',hideReq);$('requiredToggle').textContent=hideReq?'▸ Show Required Tables':'▾ Hide Required Tables';$('editor').value='';$('status').textContent='';renderQuestions()}
+function toggle(id){$(id).classList.toggle('hide')}
+function nextQ(){let f=$('filter').value;for(let n=1;n<=questions.length;n++){let i=(current+n)%questions.length;if(f==='All'||questions[i].difficulty===f){loadQ(i);window.scrollTo({top:0,behavior:'smooth'});return}}}
+
+function sqlGuidance(errorText,sql){
+  const e=(errorText||'').toLowerCase();
+  const s=(sql||'').toLowerCase();
+  let title='SQL Error';
+  let detail=errorText||'The database could not execute your query.';
+  let fix='Check the SQL syntax near the reported location, then run the query again.';
+  let example='';
+
+  if(e.includes('near "are"') || /\bis\s+null\b/.test(s)===false && /\bwhere\b[\s\S]*\bare\s+null\b/.test(s)){
+    title='NULL comparison syntax error';
+    fix='In SQL, NULL is checked with <code>IS NULL</code> or <code>IS NOT NULL</code>. Do not use <code>ARE NULL</code>.';
+    example='WHERE allergies IS NULL';
+  }else if(e.includes('near "null"') || e.includes('is null')){
+    title='NULL condition';
+    fix='Use <code>IS NULL</code> / <code>IS NOT NULL</code> for NULL values. Equality operators such as <code>= NULL</code> do not work as intended.';
+    example='WHERE allergies IS NULL';
+  }else if(e.includes('no such column')){
+    title='Column name error';
+    const m=errorText.match(/no such column:\s*(.+)/i);
+    fix='The column named <code>'+(m?esc(m[1]):'here')+'</code> is not available in the selected table/alias. Check the schema and spelling.';
+    example='SELECT first_name, last_name FROM patients;';
+  }else if(e.includes('no such table')){
+    title='Table name error';
+    const m=errorText.match(/no such table:\s*(.+)/i);
+    fix='The table <code>'+(m?esc(m[1]):'')+'</code> does not exist in this database. Click the table on the left and verify the name.';
+    example='SELECT * FROM patients;';
+  }else if(e.includes('ambiguous column name')){
+    title='Ambiguous column';
+    fix='The same column exists in more than one table. Prefix it with the table alias.';
+    example='SELECT e.employee_name, d.department_name FROM employees e JOIN departments d ON e.department_id = d.department_id;';
+  }else if(e.includes('syntax error')){
+    title='SQL syntax error';
+    fix='SQLite found invalid SQL syntax. Look at the word/character immediately before the reported location. Check keywords, commas, parentheses, quotes, and operators.';
+    example='Example: WHERE allergies IS NULL';
+  }else if(e.includes('misuse of aggregate')){
+    title='Aggregate function error';
+    fix='Aggregate functions such as AVG, SUM and COUNT usually belong with GROUP BY, HAVING, or a subquery/CTE.';
+    example='SELECT department_id, AVG(salary) FROM employees GROUP BY department_id;';
+  }else if(e.includes('no such function')){
+    title='Unsupported function';
+    fix='That function is not available in SQLite. Check the supported SQL syntax for this practice database.';
+  }else if(e.includes('datatype mismatch')){
+    title='Data type mismatch';
+    fix='Check whether you are comparing numbers with text or inserting a value into the wrong data type.';
+  }
+  return {title,detail,fix,example};
+}
+
+function showSQLError(errorText,sql){
+  const g=sqlGuidance(errorText,sql);
+  $('result').innerHTML=
+    '<div class=errorguide>'+
+      '<div class=errtitle>✗ '+esc(g.title)+'</div>'+
+      '<div><b>Database error:</b> '+esc(g.detail)+'</div>'+
+      '<div class=hinttitle>How to fix it</div>'+
+      '<div>'+g.fix+'</div>'+
+      (g.example?'<div class=hinttitle>Example</div><div><code>'+esc(g.example)+'</code></div>':'')+
+    '</div>';
+}
+
+
+let successPopupTimer=null;
+function showSuccessPopup(message){
+  const old=document.querySelector('.success-popup');
+  if(old) old.remove();
+  const el=document.createElement('div');
+  el.className='success-popup';
+  el.innerHTML='<div class="popup-title">✓ You Got The Query Correct</div>'+
+              '<div class="popup-sub">'+esc(message||'Congratulations on solving the question.')+'</div>';
+  document.body.appendChild(el);
+  clearTimeout(successPopupTimer);
+  successPopupTimer=setTimeout(()=>{el.remove();},5000);
+}
+
 let db=null;
-let SQL=null;
-let questions=[];
-let current=0;
-let solved=new Set();
-let dbOpen=false;
-let selectedCatalogTable=null;
-let requiredDataOpen=false;
+async function initDatabase(){
+  const SQL = await initSqlJs({
+    locateFile: file => 'https://cdn.jsdelivr.net/npm/sql.js@1.13.0/dist/'+file
+  });
+  db = new SQL.Database();
 
-const $=id=>document.getElementById(id);
-const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  for(const t of tables){
+    const cols = DATA.schemas[t];
+    const defs = cols.map(c =>
+      '"' + c.name.replace(/"/g,'""') + '" ' + c.type + (c.pk ? ' PRIMARY KEY' : '')
+    ).join(',');
+    db.run('CREATE TABLE "' + t.replace(/"/g,'""') + '" (' + defs + ')');
 
-window.addEventListener('online',()=>setOnline(true));
-window.addEventListener('offline',()=>setOnline(false));
-
-function setOnline(ok){
-  const e=$('onlineStatus');
-  if(!e)return;
-  e.textContent=ok?'● Database connected':'● Browser SQL engine offline';
-  e.style.color=ok?'#176b34':'#b42318';
-}
-
-function toggleLeftPanel(){
-  const layout=$('layout'), panel=$('leftPanel'), btn=$('leftCollapseBtn');
-  const collapsed=panel.classList.toggle('panel-is-collapsed');
-  layout.classList.toggle('left-collapsed',collapsed);
-  btn.textContent=collapsed?'›':'‹';
-  btn.title=collapsed?'Show database panel':'Hide database panel';
-}
-function toggleRightPanel(){
-  const layout=$('layout'), panel=$('rightPanel'), btn=$('rightCollapseBtn');
-  const collapsed=panel.classList.toggle('panel-is-collapsed');
-  layout.classList.toggle('right-collapsed',collapsed);
-  btn.textContent=collapsed?'‹':'›';
-  btn.title=collapsed?'Show question bank':'Hide question bank';
+    const rows = DATA.data[t].rows || [];
+    if(rows.length){
+      const placeholders = rows[0].map(()=>'?').join(',');
+      const stmt = db.prepare(
+        'INSERT INTO "' + t.replace(/"/g,'""') + '" VALUES (' + placeholders + ')'
+      );
+      try{
+        for(const row of rows) stmt.run(row);
+      } finally {
+        stmt.free();
+      }
+    }
+  }
+  handleOnline();
+  $('serverStatus').textContent='● Browser SQL engine ready';
+  $('serverStatus').style.color='#16803a';
 }
 
-function toggleDatabaseCatalog(){
-  dbOpen=!dbOpen;
-  $('dbContent').classList.toggle('hide',!dbOpen);
-  $('dbArrow').textContent=dbOpen?'▾':'▸';
-  if(dbOpen)renderTables();
+function resultToArray(result){
+  if(!result || !result.length) return {columns:[], rows:[]};
+  return {
+    columns: result[0].columns.map(String),
+    rows: result[0].values || []
+  };
 }
 
-function renderTables(){
-  if(!db)return;
-  const filter=($('search').value||'').toLowerCase().trim();
-  let names=db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name")[0]?.values.map(r=>r[0])||[];
-  $('dbmeta').textContent=names.length+' tables';
-  names=names.filter(n=>n.toLowerCase().includes(filter));
-  $('tables').innerHTML=names.map(name=>{
-    const info=tableInfo(name);
-    const cols=info.map(x=>x.name);
-    const open=selectedCatalogTable===name;
-    return `<div class="catalog-table" onclick="selectCatalogTable('${esc(name)}')"><span class="catalog-icon">▦</span><span class="catalog-name">${esc(name)}</span><span class="catalog-cols">${info.length} cols</span></div>${open?renderCatalogDetail(name,info,cols):`<div class="catalog-sub">${esc(cols.slice(0,5).join(' · '))}${cols.length>5?' · …':''}</div>`}`;
-  }).join('')||'<div style="padding:12px;color:#6b7280">No tables found.</div>';
-}
-
-function tableInfo(name){
-  try{
-    const r=db.exec(`PRAGMA table_info("${name.replaceAll('"','""')}")`)[0];
-    return r?r.values.map(x=>({name:x[1],type:x[2],pk:!!x[5]})):[];
-  }catch(e){return[]}
-}
-function renderCatalogDetail(name,info,cols){
-  return `<div class="table-detail"><div class="table-detail-title">${esc(name)}</div><button class="mini-action" onclick="event.stopPropagation();showTableData('${esc(name)}')">View Data</button><div style="margin-top:8px"><table><tr><th>Column</th><th>Type</th><th>Key</th></tr>${info.map(c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.type||'')}</td><td>${c.pk?'PRIMARY KEY':''}</td></tr>`).join('')}</table></div></div>`;
-}
-function selectCatalogTable(name){
-  selectedCatalogTable=selectedCatalogTable===name?null:name;
-  renderTables();
-}
-function showTableData(name){
-  try{
-    const r=db.exec(`SELECT * FROM "${name.replaceAll('"','""')}" LIMIT 100`)[0];
-    const html=r?resultHTML(r.columns,r.values):'<div style="padding:10px">No rows.</div>';
-    openModal(name+' — Data',html);
-  }catch(e){alert(e.message)}
-}
-
-function changeDifficulty(){
-  const f=$('filter').value;
-  const list=filteredQuestions();
-  if(!list.length){
-    $('title').textContent='No questions found';
-    $('prompt').textContent='There are no questions for this difficulty.';
+async function runQuery(){
+  const sql=$('editor').value.trim();
+  if(!sql){
+    $('status').innerHTML='<span class=error>✗ Please enter a SQL query.</span>';
     return;
   }
-  // Always open the first question of the selected difficulty.
-  // Previous/Next continue to use filteredQuestions(), so navigation
-  // remains inside the selected difficulty.
-  current=questions.indexOf(list[0]);
-  renderQuestion();
-}
-function filteredQuestions(){
-  const f=$('filter').value;
-  return f==='All'?questions:questions.filter(q=>(q.difficulty||'').toLowerCase()===f.toLowerCase());
-}
-function renderQuestion(){
-  if(!questions.length)return;
-  const q=questions[current];
-  $('title').textContent=q.title||'';
-  $('tags').innerHTML=`<span class="tag">${esc(q.id||'')}</span><span class="tag">${esc(q.difficulty||'')}</span><span class="tag">${esc(q.topic||'')}</span>`;
-  $('prompt').textContent=q.prompt||'';
-  $('requiredSection').classList.add('hide');
-  $('requiredToggle').textContent='▸ Show Required Tables';
-  $('schema').innerHTML='';
-  requiredDataOpen=false;
-  $('req').innerHTML=(q.tables||[]).map((t,i)=>`<button type="button" class="required-table-btn" onclick="showRequiredTable(${i})">▦ ${esc(t)}</button>`).join('')||'<span style="color:#6b7280;font-size:12px">No required tables listed.</span>';
-  $('hint').textContent=q.hint||'No hint available.';$('hint').classList.add('hide');
-  $('solutionText').textContent=q.sql||'';$('solution').classList.add('hide');$('expected').classList.add('hide');
-  $('expectedTable').innerHTML=resultHTML(q.columns||[],q.expected||[]);
-  $('editor').value='';$('status').innerHTML='';$('result').innerHTML='<div style="padding:12px;color:#6b7280">Write your query and click Run.</div>';
-  renderQuestions();
-  updateProgress();
-}
-function toggleRequired(){
-  const opening=$('requiredSection').classList.contains('hide');
-  $('requiredSection').classList.toggle('hide',!opening);
-  $('requiredToggle').textContent=opening?'▾ Hide Required Tables':'▸ Show Required Tables';
-  if(!opening)$('schema').innerHTML='';
-}
-function showRequiredTable(index){
-  const q=questions[current], t=(q.tables||[])[index];
-  if(!t)return;
-  const schema=tableInfo(t);
-  document.querySelectorAll('.required-table-btn').forEach((b,i)=>b.classList.toggle('active',i===index));
-  $('schema').innerHTML=`<div class="req-schema-card"><div class="req-schema-head"><b>${esc(t)} — Schema</b><button class="view-data-btn" onclick="toggleRequiredData('${esc(t)}')">${requiredDataOpen?'Hide Data':'View Data'}</button></div><table><tr><th>Column</th><th>Type</th><th>Key</th></tr>${schema.map(c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.type||'')}</td><td>${c.pk?'PRIMARY KEY':''}</td></tr>`).join('')}</table><div id="requiredData" class="req-data ${requiredDataOpen?'':'hide'}"></div></div>`;
-  if(requiredDataOpen)renderRequiredData(t);
-}
-function toggleRequiredData(t){requiredDataOpen=!requiredDataOpen;showRequiredTable((questions[current].tables||[]).indexOf(t));}
-function renderRequiredData(t){
-  try{const r=db.exec(`SELECT * FROM "${t.replaceAll('"','""')}" LIMIT 100`)[0];$('requiredData').innerHTML=r?resultHTML(r.columns,r.values):'No rows.';}catch(e){$('requiredData').textContent=e.message}
-}
-function toggleBlock(id){$(id).classList.toggle('hide')}
+  if(!db){
+    $('status').innerHTML='<span class=error>✗ SQL engine is still loading. Please wait a moment and run again.</span>';
+    return;
+  }
 
-function renderQuestions(){
-  const list=filteredQuestions();
-  $('count').textContent=list.length+' questions';
-  const currentId=questions[current]?.id;
-  $('qbank').innerHTML=list.map(q=>`<div class="qitem ${q.id===currentId?'active':''}" onclick="jumpTo('${esc(q.id)}')"><span>${esc(q.id)} ${esc(q.title)}</span><span class="diff">${esc(q.difficulty||'')}</span></div>`).join('')||'<div style="padding:12px;color:#6b7280">No questions.</div>';
-}
-function toggleQuestionBank(){
-  const open=$('qbank').classList.contains('hide');
-  $('qbank').classList.toggle('hide',!open);
-  $('qbankToggle').childNodes[0].nodeValue=open?'▾ Question Bank ':'▸ Question Bank ';
-}
-function jumpTo(id){
-  const idx=questions.findIndex(q=>q.id===id);
-  if(idx<0)return;
-  current=idx;$('filter').value='All';renderQuestion();
-}
-function nextQ(){navigate(1)}
-function prevQ(){navigate(-1)}
-function navigate(step){
-  const list=filteredQuestions();
-  if(!list.length)return;
-  const idx=Math.max(0,list.findIndex(q=>q.id===questions[current]?.id));
-  const next=(idx+step+list.length)%list.length;
-  current=questions.indexOf(list[next]);
-  renderQuestion();
-}
+  $('status').innerHTML='<span style="color:#555">Running and checking your answer...</span>';
+  $('result').innerHTML='<div style="padding:12px;color:#6b7280">Executing in browser SQLite...</div>';
 
-function clearQuery(){
-  $('editor').value='';
-  $('status').innerHTML='<span style="color:#6b7280">Query cleared.</span>';
-  $('result').innerHTML='<div style="padding:12px;color:#6b7280">Write your query and click Run.</div>';
-  $('editor').focus();
-}
-function formatSQL(){
-  let s=$('editor').value.trim();
-  if(!s)return;
-  s=s.replace(/\s+/g,' ').replace(/\s*,\s*/g,', ').replace(/\s*;?$/,';');
-  s=s.replace(/\b(FROM|WHERE|GROUP BY|HAVING|ORDER BY|LIMIT|JOIN|LEFT JOIN|RIGHT JOIN|INNER JOIN|FULL JOIN|UNION|WITH)\b/gi,'\n$1');
-  $('editor').value=s.trim();
-}
-function resetDatabase(){
-  if(confirm('Reset the database and reload the page?'))location.reload();
-}
-
-function resultHTML(columns,rows){
-  if(!columns||!columns.length)return '<div style="padding:12px;color:#6b7280">No tabular result.</div>';
-  let h='<table><tr>'+columns.map(c=>`<th>${esc(c)}</th>`).join('')+'</tr>';
-  for(const row of rows||[])h+='<tr>'+row.map(v=>`<td>${esc(v)}</td>`).join('')+'</tr>';
-  return h+'</table>';
-}
-function resultToArray(result){
-  if(!result||!result.length)return {columns:[],rows:[]};
-  return {columns:result[0].columns,rows:result[0].values};
-}
-function normalize(v){return v===null?null:String(v)}
-function sameResult(actual,expected){
-  if(actual.columns.map(String).join('|')!==expected.columns.map(String).join('|'))return false;
-  if(actual.rows.length!==expected.rows.length)return false;
-  return actual.rows.every((r,i)=>r.map(normalize).join('|')===expected.rows[i].map(normalize).join('|'));
-}
-function runQuery(){
-  const sql=$('editor').value.trim();
-  if(!sql){$('status').innerHTML='<span class="error">✗ Please enter a SQL query.</span>';return;}
-  if(!db){$('status').innerHTML='<span class="error">✗ Database is still loading.</span>';return;}
-  $('status').innerHTML='<span>Running and checking your answer...</span>';
   try{
     const x=resultToArray(db.exec(sql));
-    $('result').innerHTML=resultHTML(x.columns,x.rows);
-    if(!x.columns.length){$('status').innerHTML='<span class="success">✓ SQL executed successfully.</span>';return;}
+
+    if(!x.columns.length){
+      $('status').innerHTML='<span class=success>✓ SQL executed successfully.</span>';
+      $('result').innerHTML='<div style="padding:12px">Statement executed successfully.</div>';
+      return;
+    }
+
+    let h='<table><tr>'+x.columns.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr>';
+    x.rows.forEach(r=>h+='<tr>'+r.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>');
+    $('result').innerHTML=h+'</table>';
+
     const q=questions[current];
-    const expected={columns:(q.columns||[]).map(String),rows:q.expected||[]};
-    const actual={columns:x.columns.map(String),rows:x.rows};
-    if(sameResult(actual,expected)){
-      solved.add(q.id);saveProgress();updateProgress();
-      $('status').innerHTML='<span class="success">✓ Correct answer</span>';
-      showSuccess(q);
+    const expectedCols=q.columns.map(String);
+    const actualCols=x.columns.map(String);
+    const norm=v=>v===null?null:String(v);
+    const actualRows=x.rows.map(r=>r.map(norm));
+    const expectedRows=q.expected.map(r=>r.map(norm));
+
+    const normCol=s=>String(s).toLowerCase().replace(/^.*\./,'').replace(/[\s_]+/g,'');
+    const actualMap={};
+    actualCols.forEach((c,i)=>actualMap[normCol(c)]=i);
+    const missing=expectedCols.filter(c=>actualMap[normCol(c)]===undefined);
+    const extra=actualCols.filter(c=>!expectedCols.some(e=>normCol(e)===normCol(c)));
+
+    let rowsAligned=[];
+    if(missing.length===0){
+      rowsAligned=actualRows.map(r=>expectedCols.map(c=>r[actualMap[normCol(c)]]));
+    }
+
+    const key=r=>JSON.stringify(r);
+    const expectedMultiset=new Map();
+    const actualMultiset=new Map();
+    expectedRows.forEach(r=>expectedMultiset.set(key(r),(expectedMultiset.get(key(r))||0)+1));
+    rowsAligned.forEach(r=>actualMultiset.set(key(r),(actualMultiset.get(key(r))||0)+1));
+
+    const rowsMatch=missing.length===0 &&
+      expectedMultiset.size===actualMultiset.size &&
+      [...expectedMultiset.entries()].every(([k,v])=>actualMultiset.get(k)===v);
+
+    const asksSort=/\b(sort|order)\b/i.test(q.prompt||'');
+    const orderMatch=expectedRows.length===actualRows.length &&
+      expectedRows.every((r,i)=>rowsAligned[i] && key(r)===key(rowsAligned[i]));
+
+    let feedback=[];
+    if(missing.length) feedback.push('Missing required column(s): '+missing.join(', ')+'.');
+    if(extra.length) feedback.push('Extra column(s) returned: '+extra.join(', ')+'.');
+    if(missing.length===0 && !rowsMatch) feedback.push('The returned rows/values do not match the expected result.');
+    if(asksSort && rowsMatch && !orderMatch) feedback.push('The rows are correct, but the required sorting/order is different.');
+
+    if(missing.length===0 && rowsMatch && (!asksSort || orderMatch)){
+      $('status').innerHTML='<span class=success>✓ Correct answer — '+actualRows.length+' row(s)</span>';
+      solved.add(q.id);
+      updateProgress();
+      showSuccessPopup('Congratulations on solving the question.');
+    }else if(missing.length===0 && rowsMatch && asksSort && !orderMatch){
+      $('status').innerHTML='<span style="color:#9a6700">⚠ Correct rows, but the required ORDER BY is missing or different.</span>';
     }else{
-      $('status').innerHTML='<span class="error">✗ SQL executed, but the result does not match the expected answer.</span>';
-      showMismatch(actual,expected);
+      $('status').innerHTML='<span class=error>✗ SQL executed, but the answer needs correction.</span>';
+      const tutor=tutorForQuestion(q,sql,actualCols,actualRows,expectedCols,expectedRows);
+      showTutor('Here is what is wrong and how to improve it',tutor);
+    }
+
+    if(feedback.length){
+      $('result').insertAdjacentHTML(
+        'beforebegin',
+        '<div style="margin:8px 0;padding:10px;background:#fffbea;border:1px solid #efd98a;border-radius:4px;font-size:12px"><b>Feedback:</b> '+feedback.map(esc).join(' ')+'</div>'
+      );
     }
   }catch(e){
-    $('status').innerHTML='<span class="error">✗ SQL error — fix the query and run again.</span>';
-    $('result').innerHTML=`<div class="errorguide"><div class="errtitle">SQL Error</div><div>${esc(e.message)}</div><div style="margin-top:8px"><b>How to fix it</b><br>Check the SQL syntax, table names and column names, then run the query again.</div></div>`;
+    $('status').innerHTML='<span class=error>✗ SQL error — fix the query and run again.</span>';
+    showSQLError(e.message,sql);
   }
 }
-function showMismatch(actual,expected){
-  const missing=expected.columns.filter(c=>!actual.columns.includes(c));
-  const extra=actual.columns.filter(c=>!expected.columns.includes(c));
-  let msg='The result does not match the expected answer.';
-  if(missing.length)msg+=' Missing required column(s): '+missing.join(', ')+'.';
-  if(extra.length)msg+=' Extra column(s): '+extra.join(', ')+'.';
-  $('result').insertAdjacentHTML('afterbegin',`<div class="errorguide"><div class="errtitle">Result does not match</div><div>${esc(msg)}</div></div>`);
-}
-function showSuccess(q){
-  const root=$('popupRoot');
-  root.innerHTML=`<div class="success-popup"><div class="popup-title">✓ You Got The Query Correct</div><div class="popup-sub">Congratulations on solving ${esc(q.id)}.</div></div>`;
-  setTimeout(()=>root.innerHTML='',2500);
-}
-function saveProgress(){localStorage.setItem('sqlPracticeSolved',JSON.stringify([...solved]))}
-function loadProgress(){try{solved=new Set(JSON.parse(localStorage.getItem('sqlPracticeSolved')||'[]'))}catch(e){solved=new Set()}}
-function updateProgress(){
-  const total=questions.length, n=[...solved].filter(id=>questions.some(q=>q.id===id)).length;
-  $('prog').textContent=`${n} / ${total} solved`;$('bar').style.width=total?`${Math.min(100,n/total*100)}%`:'0%';
-}
 
-function openModal(title,body){
-  $('modalRoot').innerHTML=`<div class="modal-backdrop" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><div class="modal-head"><div class="modal-title">${esc(title)}</div><button class="modal-close" onclick="closeModal()">×</button></div><div class="modal-body">${body}</div></div></div>`;
-}
-function closeModal(){ $('modalRoot').innerHTML=''; }
-function openDatabaseModal(){
-  if(!db){openModal('Database','Database is still loading.');return;}
-  const names=db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name")[0]?.values.map(r=>r[0])||[];
-  const body=`<p style="color:#6b7280">Browser SQLite database: <b>practice.db</b></p><div class="question-grid">${names.map(n=>`<div class="allq" onclick="closeModal();selectCatalogTable('${esc(n)}');if(!$('dbContent').classList.contains('hide'))renderTables();else toggleDatabaseCatalog();"><strong>▦ ${esc(n)}</strong><div>${tableInfo(n).length} columns</div></div>`).join('')}</div>`;
-  openModal('Database Catalog',body);
-}
-function openSettings(){
-  openModal('Settings',`<div class="setting-row"><div><div class="setting-label">Auto-open database catalog</div><div class="setting-desc">Keep practice.db collapsed until you click it.</div></div><input type="checkbox" id="autoDb"></div><div class="setting-row"><div><div class="setting-label">Question Bank</div><div class="setting-desc">Question Bank is collapsed by default to save workspace.</div></div><span style="color:#16803a">Enabled</span></div><div class="setting-row"><div><div class="setting-label">Editor</div><div class="setting-desc">SQL editor is ready for the future SQL + PySpark comparison layout.</div></div><span style="color:#16803a">Ready</span></div>`);
-}
-function openAllQuestions(){
-  const list=filteredQuestions();
-  const body=`<div style="margin-bottom:10px;color:#6b7280">Showing ${list.length} questions for <b>${esc($('filter').value)}</b>.</div><div class="question-grid">${list.map(q=>`<div class="allq" onclick="closeModal();jumpTo('${esc(q.id)}')"><strong>${esc(q.id)} — ${esc(q.title)}</strong><div>${esc(q.difficulty||'')} · ${esc(q.topic||'')}</div></div>`).join('')}</div>`;
-  openModal('All Questions',body);
-}
-
-async function loadDatabase(){
+function updateProgress(){$('prog').textContent=solved.size+' / '+questions.length+' solved';$('bar').style.width=(solved.size/questions.length*100)+'%'}
+function clearEd(){$('editor').value='';$('status').textContent='';$('result').innerHTML='<div style="padding:12px;color:#6b7280">Write your query and click Run.</div>';const p=document.querySelector('.success-popup');if(p)p.remove()}
+function formatSQL(){let s=$('editor').value.replace(/\s+/g,' ').trim();['FROM','WHERE','GROUP BY','HAVING','ORDER BY','LEFT JOIN','INNER JOIN','LIMIT'].forEach(k=>s=s.replace(new RegExp('\\s'+k+'\\s','ig'),'\n'+k+' '));$('editor').value=s}
+async function resetDB(){
   try{
-    SQL=await initSqlJs({locateFile:file=>`https://cdn.jsdelivr.net/npm/sql.js@1.13.0/dist/${file}`});
-    const response=await fetch('practice.db',{cache:'no-store'});
-    if(!response.ok)throw new Error('Could not load practice.db (HTTP '+response.status+').');
-    const bytes=new Uint8Array(await response.arrayBuffer());
-    db=new SQL.Database(bytes);
-    setOnline(true);renderTables();
+    if(db) db.close();
+    await initDatabase();
+    $('result').innerHTML='<div style="padding:12px">Browser SQLite database reset successfully.</div>';
+    $('status').innerHTML='<span class=success>✓ Browser SQLite database reset.</span>';
+    solved.clear();
+    updateProgress();
   }catch(e){
-    setOnline(false);
-    $('status').innerHTML=`<span class="error">Database load failed: ${esc(e.message)}</span>`;
+    $('status').innerHTML='<span class=error>✗ '+esc(e.message)+'</span>';
   }
 }
-async function loadQuestions(){
-  try{
-    const response=await fetch('questions.json',{cache:'no-store'});
-    if(!response.ok)throw new Error('Could not load questions.json (HTTP '+response.status+').');
-    questions=await response.json();
-    if(!Array.isArray(questions))throw new Error('questions.json must contain an array.');
-    loadProgress();
-    renderQuestion();
-  }catch(e){
-    $('title').textContent='Question bank could not be loaded';
-    $('prompt').textContent=e.message;
-  }
-}
-
-(async function init(){
-  await Promise.all([loadQuestions(),loadDatabase()]);
-})();
-</script>
-</body>
-</html>
+loadSettings();renderTables();renderQuestions();loadQ(0);
+initDatabase().catch(function(e){
+  handleOffline();
+  document.getElementById('serverStatus').textContent='● Browser SQL engine failed to load';
+  document.getElementById('status').innerHTML='<span class=error>✗ Browser SQL engine could not load. Refresh and try again.</span>';
+  console.error(e);
+});
+document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();runQuery();}if(e.key==='Escape'){['databaseModal','settingsModal','allQuestionsModal'].forEach(closeModal);}});
+renderTables();renderQuestions();loadQ(0);
+initDatabase().catch(function(e){
+  handleOffline();
+  document.getElementById('serverStatus').textContent='● SQL engine failed to load';
+  document.getElementById('status').innerHTML='<span class=error>✗ Browser SQL engine could not load. Check your internet connection and refresh.</span>';
+  console.error(e);
+});
+document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();runQuery();}if(e.key==='Escape'){['databaseModal','settingsModal','allQuestionsModal'].forEach(closeModal);}});
+</script><div id="databaseModal" class="modal-backdrop hide" onclick="closeModalOnBackdrop(event,'databaseModal')"><div class=modal><div class=modal-head><span class=modal-title>Database Catalog</span><span style="font-size:12px;color:#6b7280">practice.db · browser SQLite</span><button class=modal-close onclick="closeModal('databaseModal')">×</button></div><div class=modal-body><div style="font-size:12px;color:#6b7280;margin-bottom:12px">Browse every dataset like a simple Unity Catalog view. Inspect schema and data without changing the SQL editor.</div><input id=datasetSearch class=search style="margin:0 0 12px;width:100%" placeholder="Search datasets..." oninput="renderDatabaseModal()"><div id=databaseModalBody></div></div></div></div><div id="settingsModal" class="modal-backdrop hide" onclick="closeModalOnBackdrop(event,'settingsModal')"><div class=modal><div class=modal-head><span class=modal-title>Settings</span><button class=modal-close onclick="closeModal('settingsModal')">×</button></div><div class=modal-body><div class=setting-row><div><div class=setting-label>Auto-clear query on Next Question</div><div class=setting-desc>Start each question with a clean SQL editor.</div></div><input id=settingAutoClear type=checkbox checked onchange=saveSettings()></div><div class=setting-row><div><div class=setting-label>Keep Required Tables hidden</div><div class=setting-desc>Required tables appear only when you click Show Required Tables.</div></div><input id=settingReq type=checkbox checked onchange=saveSettings()></div></div></div></div><div id="allQuestionsModal" class="modal-backdrop hide" onclick="closeModalOnBackdrop(event,'allQuestionsModal')"><div class=modal><div class=modal-head><span class=modal-title>All 100 SQL Interview Questions</span><span id=allQCount style="font-size:12px;color:#6b7280"></span><button class=modal-close onclick="closeModal('allQuestionsModal')">×</button></div><div class=modal-body><input id=allQSearch class=search style="margin:0 0 12px;width:100%" placeholder="Search by question, topic or difficulty..." oninput=renderAllQuestionsModal()><div id=allQBody class=question-grid></div></div></div></div></body></html>

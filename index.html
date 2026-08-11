@@ -64,12 +64,24 @@
 @media(max-width:1050px){.layout{grid-template-columns:250px minmax(0,1fr)}.right{display:none}}
 @media(max-width:700px){body{font-size:14px}.top{height:auto;min-height:58px;padding:8px 10px;align-items:center;flex-wrap:wrap}.brand{font-size:16px;flex:1 1 auto}.top-nav{order:3;width:100%;overflow-x:auto;justify-content:flex-start;padding-top:2px}.top-btn{flex:0 0 auto;background:#f7f8fa}.layout{display:block;height:auto}.left{display:none}.center{padding:8px;background:#f7f8fa;overflow:visible}.question{padding:12px}.next{margin-left:auto;padding:8px 10px}.title{font-size:19px;line-height:1.25}.editor-wrap textarea{height:220px}.buttons{flex-wrap:wrap}.buttons button{flex:1 1 auto}.question-grid{grid-template-columns:1fr}.modal-backdrop{padding:8px}.modal{width:100%;max-height:94vh;border-radius:8px}.modal-body{padding:12px}.success-popup{left:10px;right:10px;top:10px;min-width:0}.result{max-width:100%;overflow:auto}.top-btn.status{font-size:11px}}
 .clear-control{border:0;background:transparent;cursor:pointer;padding:0;margin:0 0 0 14px;font:inherit;color:#1268a0}
+
+/* Required-table explorer: hidden by default, drill down table -> schema -> data */
+.required-table-list{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.required-table-btn{border:1px solid #cbd5e1;background:#f8fafc;border-radius:16px;padding:6px 10px;cursor:pointer;font-size:12px;color:#1f4f8a}
+.required-table-btn:hover{background:#eef6ff}
+.required-table-btn.active{background:#e8f2ff;border-color:#8db8ea;font-weight:700}
+.req-detail{margin-top:10px}
+.req-schema-card{border:1px solid #d7dce2;border-radius:5px;background:#fff;padding:10px}
+.req-schema-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.view-data-btn{border:1px solid #cbd5e1;background:#fff;border-radius:4px;padding:5px 9px;cursor:pointer;font-size:12px}
+.view-data-btn:hover{background:#f5f7fa}
+.req-data{margin-top:10px;max-height:280px;overflow:auto;border-top:1px solid #e5e7eb;padding-top:8px}
 </style><script src="https://cdn.jsdelivr.net/npm/sql.js@1.13.0/dist/sql-wasm.js"></script></head><body>
 <div class=top><div class=brand>Learn SQL - Online SQL Terminal</div><span class=offline style="background:#eefaf0;color:#176b34;border-color:#b8dfc0">ONLINE</span><div class=top-nav><button class="top-btn status" id="online-status">● Database connected</button><span id=serverStatus style="color:#16803a;font-size:11px;white-space:nowrap"></span><button class=top-btn onclick="openDatabaseModal()">Database</button><button class=top-btn onclick="openSettings()">Settings</button><button class=top-btn onclick="openAllQuestions()">View All Questions</button></div></div>
 <div class=layout>
 <aside class=left><h3>SQL Database</h3><input id=search class=search placeholder="Search datasets / tables..." oninput=renderTables()><div class=db><div class=dbhead><b>practice.db</b><span class=db-meta id=dbmeta>18 tables</span><span style="color:#16803a">●</span></div><div id=tables></div></div><h3>Learning Resources</h3><div class=resource onclick="alert('JOINs: INNER JOIN, LEFT JOIN, self join, anti join and multi-table joins.')">JOINs</div><div class=resource onclick="alert('Window Functions: ROW_NUMBER, RANK, DENSE_RANK, LAG, LEAD and running totals.')">Window Functions</div><div class=resource onclick="alert('CTEs: build multi-step transformations using WITH.')">CTEs</div><div class=resource onclick="alert('Dates & Calendar: date parts, month analysis and calendar joins.')">Dates & Calendar</div><div class=resource onclick="alert('SCD Type 2: current records, history and point-in-time lookup.')">SCD Type 2</div></aside>
 <main class=center>
-<div class=question><div class=qbar><span class=label>Question</span><select id=filter class=select onchange=renderQuestions()><option>All</option><option>Easy</option><option>Medium</option><option>Hard</option></select><button class=next onclick=nextQ()>Next Question ›</button></div><h2 id=title class=title></h2><div id=tags></div><p id=prompt></p><div><span id=requiredToggle class=toggle onclick=toggleRequired()>▸ Show Required Tables</span></div><div id=requiredSection class=hide><div class=required>Required tables</div><div id=req style="margin-top:7px"></div><div id=schema></div></div><div><span class=toggle onclick=toggle('hint')>💡 Show Hint</span><span class=toggle onclick=toggle('expected')>▸ Show Expected Output</span><span class=toggle onclick=toggle('solution')>▸ Show Solution</span></div><div id=hint class="hint hide"></div><div id=expected class="hide" style="margin-top:10px"><b style="font-size:12px">Expected Output</b><div id=expectedTable class=preview></div></div><div id=solution class="hide"><b style="font-size:12px">Solution</b><div id=solutionText class=solution></div></div></div>
+<div class=question><div class=qbar><span class=label>Question</span><select id=filter class=select onchange=renderQuestions()><option>All</option><option>Easy</option><option>Medium</option><option>Hard</option></select><button class=next onclick=nextQ()>Next Question ›</button></div><h2 id=title class=title></h2><div id=tags></div><p id=prompt></p><div><span id=requiredToggle class=toggle onclick=toggleRequired()>▸ Show Required Tables</span></div><div id=requiredSection class=hide><div class=required>Required tables</div><div id=req class="required-table-list"></div><div id=schema class="req-detail"></div></div><div><span class=toggle onclick=toggle('hint')>💡 Show Hint</span><span class=toggle onclick=toggle('expected')>▸ Show Expected Output</span><span class=toggle onclick=toggle('solution')>▸ Show Solution</span></div><div id=hint class="hint hide"></div><div id=expected class="hide" style="margin-top:10px"><b style="font-size:12px">Expected Output</b><div id=expectedTable class=preview></div></div><div id=solution class="hide"><b style="font-size:12px">Solution</b><div id=solutionText class=solution></div></div></div>
 <div style="font-size:12px;color:#555;margin-top:10px">Connected to a browser-based SQLite database. Type your SQL below and click <b>Run</b>. The checker validates only the result returned by your SQL.</div><div class=editor-wrap><div class=tabs><span class=tab>SQL Query</span><button id="clearTopBtn" type="button" class="toggle clear-control">Clear</button></div><textarea id=editor spellcheck=false></textarea><div class=buttons><button class=run onclick="runQuery()">▶ Run</button><button onclick=formatSQL>Format SQL</button><button id="clearBtn" type="button">Clear</button><button onclick=resetDB>Reset Database</button></div><div id=status class=status></div></div>
 <div class=resultbox><div class=resulthead>Query Result</div><div id=result class=result><div style="padding:12px;color:#6b7280">Write your query and click Run.</div></div></div>
 </main>
@@ -108,7 +120,72 @@ function renderAllQuestionsModal(){let search=($('allQSearch').value||'').toLowe
 function renderTables(){let s=($('search').value||'').toLowerCase();$('dbmeta').textContent=tables.length+' tables';$('tables').innerHTML=tables.filter(t=>t.toLowerCase().includes(s)).map(t=>`<div class="catalog-table" onclick="showTable('${t}')"><span class=catalog-icon>▦</span><span class=catalog-name>${esc(t)}</span><span class=catalog-cols>${DATA.schemas[t].length} cols</span></div><div class=catalog-sub>${DATA.schemas[t].slice(0,4).map(c=>esc(c.name)).join(' · ')}${DATA.schemas[t].length>4?' · …':''}</div>`).join('')}
 function showTable(t){openDatabaseModal(t)}
 function renderQuestions(){let f=$('filter').value;let arr=questions.map((q,i)=>({q,i})).filter(x=>f==='All'||x.q.difficulty===f);$('count').textContent=arr.length;$('qbank').innerHTML=arr.map(x=>`<div class="qitem ${x.i===current?'active':''}" onclick="loadQ(${x.i})"><span style="color:#777">${x.q.id}</span> ${esc(x.q.title)} <span class=diff>${x.q.difficulty}</span></div>`).join('')}
-function loadQ(i){current=(i+questions.length)%questions.length;let q=questions[current];$('title').textContent=q.title;$('tags').innerHTML=`<span class=tag>${q.id}</span><span class=tag>${q.difficulty}</span><span class=tag>${esc(q.topic)}</span>`;$('prompt').textContent=q.prompt;$('req').innerHTML=q.tables.map(t=>`<span class=tag>${t}</span>`).join('');$('hint').textContent=q.hint;$('solutionText').textContent=q.sql;let sh='<div class=schema>';q.tables.forEach(t=>{sh+='<b style="font-size:12px">'+t+'</b><table><tr><th>Column</th><th>Type</th><th>Key</th></tr>'+DATA.schemas[t].map(c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.type)}</td><td>${c.pk?'PRIMARY KEY':''}</td></tr>`).join('')+'</table><br>'});$('schema').innerHTML=sh+'</div>';let h='<table><tr>'+q.columns.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr>';q.expected.forEach(r=>h+='<tr>'+r.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>');$('expectedTable').innerHTML=h+'</table>';['hint','expected','solution'].forEach(x=>$(x).classList.add('hide'));const hideReq=localStorage.getItem('sqlPracticeReq')!=='0';$('requiredSection').classList.toggle('hide',hideReq);$('requiredToggle').textContent=hideReq?'▸ Show Required Tables':'▾ Hide Required Tables';$('editor').value='';$('status').textContent='';renderQuestions()}
+function loadQ(i){
+  current=(i+questions.length)%questions.length;
+  let q=questions[current];
+  $('title').textContent=q.title;
+  $('tags').innerHTML=`<span class=tag>${q.id}</span><span class=tag>${q.difficulty}</span><span class=tag>${esc(q.topic)}</span>`;
+  $('prompt').textContent=q.prompt;
+
+  // Required tables are ALWAYS collapsed when a question is opened.
+  $('requiredSection').classList.add('hide');
+  $('requiredToggle').textContent='▸ Show Required Tables';
+
+  // Show only the required table names initially. Schema/data are drill-down views.
+  $('req').innerHTML=q.tables.map((t,idx)=>`<button type="button" class="required-table-btn" onclick="showRequiredTable(${idx})">▦ ${esc(t)}</button>`).join('');
+  $('schema').innerHTML='';
+
+  $('hint').textContent=q.hint;
+  $('solutionText').textContent=q.sql;
+  $('hint').classList.add('hide');
+  $('expected').classList.add('hide');
+  $('solution').classList.add('hide');
+
+  let h='<table><tr>'+q.columns.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr>';
+  q.expected.forEach(r=>h+='<tr>'+r.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>');
+  $('expectedTable').innerHTML=h+'</table>';
+
+  $('editor').value='';
+  $('status').textContent='';
+  renderQuestions();
+}
+
+function toggleRequired(){
+  const s=$('requiredSection'), t=$('requiredToggle');
+  const opening=s.classList.contains('hide');
+  s.classList.toggle('hide');
+  t.textContent=opening?'▾ Hide Required Tables':'▸ Show Required Tables';
+  if(!opening){
+    $('schema').innerHTML='';
+  }
+}
+
+function showRequiredTable(index){
+  const q=questions[current];
+  const t=q.tables[index];
+  const schema=DATA.schemas[t];
+  document.querySelectorAll('.required-table-btn').forEach((b,i)=>b.classList.toggle('active',i===index));
+
+  const rows=DATA.data[t] ? DATA.data[t].rows : [];
+  const cols=DATA.data[t] ? DATA.data[t].columns : schema.map(c=>c.name);
+  const dataHtml=rows.length ? `<div class="req-data hide" id="reqData_${index}"><table><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr>${rows.map(r=>`<tr>${r.map(v=>`<td>${esc(v)}</td>`).join('')}</tr>`).join('')}</table></div>` : `<div class="req-data hide" id="reqData_${index}">No preview data available.</div>`;
+
+  $('schema').innerHTML=`<div class="req-schema-card">
+    <div class="req-schema-head"><b>${esc(t)}</b><button type="button" class="view-data-btn" onclick="toggleRequiredData(${index})">▸ View Data</button></div>
+    <table><tr><th>Column</th><th>Type</th><th>Key</th></tr>${schema.map(c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.type)}</td><td>${c.pk?'PRIMARY KEY':''}</td></tr>`).join('')}</table>
+    ${dataHtml}
+  </div>`;
+}
+
+function toggleRequiredData(index){
+  const el=$('reqData_'+index);
+  if(!el)return;
+  const btn=el.parentElement.querySelector('.view-data-btn');
+  const opening=el.classList.contains('hide');
+  el.classList.toggle('hide');
+  if(btn)btn.textContent=opening?'▾ Hide Data':'▸ View Data';
+}
+
 function toggle(id){$(id).classList.toggle('hide')}
 function nextQ(){let f=$('filter').value;for(let n=1;n<=questions.length;n++){let i=(current+n)%questions.length;if(f==='All'||questions[i].difficulty===f){loadQ(i);window.scrollTo({top:0,behavior:'smooth'});return}}}
 

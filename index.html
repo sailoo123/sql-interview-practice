@@ -63,13 +63,14 @@
 .top{position:sticky;top:0;z-index:1000;min-width:0;gap:10px}.brand{white-space:nowrap}.top-nav{margin-left:auto;display:flex;align-items:center;gap:6px;min-width:0}.top-btn{border:0;background:#fff;color:#374151;padding:7px 9px;border-radius:7px;font-size:13px;white-space:nowrap}.top-btn:hover{background:#f3f6f9}.layout{grid-template-columns:300px minmax(0,1fr) 300px}.left{background:#fbfcfd}.dbhead{display:flex;align-items:center;gap:7px}.db-meta{margin-left:auto;color:#6b7280;font-size:10px;font-weight:400}.catalog-table{padding:10px 12px;border-top:1px solid #edf0f2;cursor:pointer;display:flex;align-items:center;gap:8px}.catalog-table:hover{background:#eef6ff}.catalog-icon{width:18px;height:18px;border:1px solid #9aa7b5;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#54708c}.catalog-name{font-weight:600}.catalog-cols{margin-left:auto;color:#6b7280;font-size:10px}.catalog-sub{padding:0 12px 9px 38px;color:#7a8490;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.question{max-width:1100px;margin:0 auto}.qbar{gap:8px;flex-wrap:wrap}.select{margin-left:0}.next{margin-left:auto}.center{min-width:0}.editor-wrap,.resultbox{max-width:1100px;margin-left:auto;margin-right:auto}.question{box-shadow:0 1px 2px rgba(0,0,0,.03)}.sidecard{border-radius:6px;overflow:hidden}.qitem{padding:9px 10px;line-height:1.35}.qitem.active{font-weight:600}.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.42);z-index:5000;display:flex;align-items:center;justify-content:center;padding:18px}.modal{width:min(1000px,96vw);max-height:90vh;overflow:auto;background:#fff;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.25);border:1px solid #d7dce2}.modal-head{position:sticky;top:0;z-index:2;background:#fff;border-bottom:1px solid #e5e7eb;padding:14px 16px;display:flex;align-items:center;gap:10px}.modal-title{font-size:17px;font-weight:700}.modal-close{margin-left:auto;border:0;font-size:20px;padding:2px 8px}.modal-body{padding:16px}.dataset-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}.dataset-chip{padding:6px 9px;border:1px solid #d7dce2;background:#fff;border-radius:14px;font-size:11px;cursor:pointer}.dataset-chip.active{background:#eaf4ff;border-color:#8fbce3;color:#0b65a3;font-weight:600}.catalog-detail{border:1px solid #d7dce2;border-radius:7px;overflow:hidden}.catalog-detail-head{padding:11px 12px;background:#f7f8fa;font-weight:700}.catalog-preview{max-height:340px;overflow:auto}.question-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.allq{border:1px solid #e0e5ea;border-radius:7px;padding:10px;cursor:pointer}.allq:hover{background:#f5f9fc;border-color:#b7c8d8}.allq strong{font-size:12px}.allq div{font-size:11px;margin-top:3px;color:#4b5563}.setting-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid #eef0f2}.setting-row:last-child{border-bottom:0}.setting-label{font-weight:600}.setting-desc{font-size:12px;color:#6b7280;margin-top:3px}
 @media(max-width:1050px){.layout{grid-template-columns:250px minmax(0,1fr)}.right{display:none}}
 @media(max-width:700px){body{font-size:14px}.top{height:auto;min-height:58px;padding:8px 10px;align-items:center;flex-wrap:wrap}.brand{font-size:16px;flex:1 1 auto}.top-nav{order:3;width:100%;overflow-x:auto;justify-content:flex-start;padding-top:2px}.top-btn{flex:0 0 auto;background:#f7f8fa}.layout{display:block;height:auto}.left{display:none}.center{padding:8px;background:#f7f8fa;overflow:visible}.question{padding:12px}.next{margin-left:auto;padding:8px 10px}.title{font-size:19px;line-height:1.25}.editor-wrap textarea{height:220px}.buttons{flex-wrap:wrap}.buttons button{flex:1 1 auto}.question-grid{grid-template-columns:1fr}.modal-backdrop{padding:8px}.modal{width:100%;max-height:94vh;border-radius:8px}.modal-body{padding:12px}.success-popup{left:10px;right:10px;top:10px;min-width:0}.result{max-width:100%;overflow:auto}.top-btn.status{font-size:11px}}
+.clear-control{border:0;background:transparent;cursor:pointer;padding:0;margin:0 0 0 14px;font:inherit;color:#1268a0}
 </style><script src="https://cdn.jsdelivr.net/npm/sql.js@1.13.0/dist/sql-wasm.js"></script></head><body>
 <div class=top><div class=brand>Learn SQL - Online SQL Terminal</div><span class=offline style="background:#eefaf0;color:#176b34;border-color:#b8dfc0">ONLINE</span><div class=top-nav><button class="top-btn status" id="online-status">● Database connected</button><span id=serverStatus style="color:#16803a;font-size:11px;white-space:nowrap"></span><button class=top-btn onclick="openDatabaseModal()">Database</button><button class=top-btn onclick="openSettings()">Settings</button><button class=top-btn onclick="openAllQuestions()">View All Questions</button></div></div>
 <div class=layout>
 <aside class=left><h3>SQL Database</h3><input id=search class=search placeholder="Search datasets / tables..." oninput=renderTables()><div class=db><div class=dbhead><b>practice.db</b><span class=db-meta id=dbmeta>18 tables</span><span style="color:#16803a">●</span></div><div id=tables></div></div><h3>Learning Resources</h3><div class=resource onclick="alert('JOINs: INNER JOIN, LEFT JOIN, self join, anti join and multi-table joins.')">JOINs</div><div class=resource onclick="alert('Window Functions: ROW_NUMBER, RANK, DENSE_RANK, LAG, LEAD and running totals.')">Window Functions</div><div class=resource onclick="alert('CTEs: build multi-step transformations using WITH.')">CTEs</div><div class=resource onclick="alert('Dates & Calendar: date parts, month analysis and calendar joins.')">Dates & Calendar</div><div class=resource onclick="alert('SCD Type 2: current records, history and point-in-time lookup.')">SCD Type 2</div></aside>
 <main class=center>
 <div class=question><div class=qbar><span class=label>Question</span><select id=filter class=select onchange=renderQuestions()><option>All</option><option>Easy</option><option>Medium</option><option>Hard</option></select><button class=next onclick=nextQ()>Next Question ›</button></div><h2 id=title class=title></h2><div id=tags></div><p id=prompt></p><div><span id=requiredToggle class=toggle onclick=toggleRequired()>▸ Show Required Tables</span></div><div id=requiredSection class=hide><div class=required>Required tables</div><div id=req style="margin-top:7px"></div><div id=schema></div></div><div><span class=toggle onclick=toggle('hint')>💡 Show Hint</span><span class=toggle onclick=toggle('expected')>▸ Show Expected Output</span><span class=toggle onclick=toggle('solution')>▸ Show Solution</span></div><div id=hint class="hint hide"></div><div id=expected class="hide" style="margin-top:10px"><b style="font-size:12px">Expected Output</b><div id=expectedTable class=preview></div></div><div id=solution class="hide"><b style="font-size:12px">Solution</b><div id=solutionText class=solution></div></div></div>
-<div style="font-size:12px;color:#555;margin-top:10px">Connected to a browser-based SQLite database. Type your SQL below and click <b>Run</b>. The checker validates only the result returned by your SQL.</div><div class=editor-wrap><div class=tabs><span class=tab>SQL Query</span><span class=toggle onclick=clearEd style="margin:0 0 0 14px">Clear</span></div><textarea id=editor spellcheck=false></textarea><div class=buttons><button class=run onclick="runQuery()">▶ Run</button><button onclick=formatSQL>Format SQL</button><button onclick=clearEd>Clear</button><button onclick=resetDB>Reset Database</button></div><div id=status class=status></div></div>
+<div style="font-size:12px;color:#555;margin-top:10px">Connected to a browser-based SQLite database. Type your SQL below and click <b>Run</b>. The checker validates only the result returned by your SQL.</div><div class=editor-wrap><div class=tabs><span class=tab>SQL Query</span><button id="clearTopBtn" type="button" class="toggle clear-control">Clear</button></div><textarea id=editor spellcheck=false></textarea><div class=buttons><button class=run onclick="runQuery()">▶ Run</button><button onclick=formatSQL>Format SQL</button><button id="clearBtn" type="button">Clear</button><button onclick=resetDB>Reset Database</button></div><div id=status class=status></div></div>
 <div class=resultbox><div class=resulthead>Query Result</div><div id=result class=result><div style="padding:12px;color:#6b7280">Write your query and click Run.</div></div></div>
 </main>
 <aside class=right><div class=sidecard><div class=sidehead>Progress</div><div class=progress><span id=prog>0 / 100 solved</span><div class=barbg><div id=bar class=bar></div></div></div></div><div class=sidecard><div class=sidehead>Question Bank <span id=count style="float:right;color:#6b7280"></span></div><div id=qbank></div></div></aside>
@@ -316,7 +317,24 @@ async function runQuery(){
 }
 
 function updateProgress(){$('prog').textContent=solved.size+' / '+questions.length+' solved';$('bar').style.width=(solved.size/questions.length*100)+'%'}
-function clearEd(){$('editor').value='';$('status').textContent='';$('result').innerHTML='<div style="padding:12px;color:#6b7280">Write your query and click Run.</div>';const p=document.querySelector('.success-popup');if(p)p.remove()}
+function clearEd(){
+  try{
+    const editor=document.getElementById("editor");
+    if(editor){
+      editor.value="";
+      editor.textContent="";
+      editor.dispatchEvent(new Event("input",{bubbles:true}));
+      editor.dispatchEvent(new Event("change",{bubbles:true}));
+      editor.focus();
+    }
+    const status=document.getElementById("status");
+    if(status) status.innerHTML="";
+    const result=document.getElementById("result");
+    if(result) result.innerHTML='<div style="padding:12px;color:#6b7280">Write your query and click Run.</div>';
+    document.querySelectorAll(".success-popup").forEach(el=>el.remove());
+    document.querySelectorAll(".tutor-box,.sql-error-box,.feedback-box").forEach(el=>el.remove());
+  }catch(e){ console.error("Clear failed",e); }
+}
 function formatSQL(){let s=$('editor').value.replace(/\s+/g,' ').trim();['FROM','WHERE','GROUP BY','HAVING','ORDER BY','LEFT JOIN','INNER JOIN','LIMIT'].forEach(k=>s=s.replace(new RegExp('\\s'+k+'\\s','ig'),'\n'+k+' '));$('editor').value=s}
 async function resetDB(){
   try{
@@ -331,6 +349,14 @@ async function resetDB(){
   }
 }
 loadSettings();renderTables();renderQuestions();loadQ(0);
+
+// Explicit Clear button bindings (avoids inline-handler/browser caching issues).
+document.addEventListener("DOMContentLoaded", function(){
+  const top=document.getElementById("clearTopBtn");
+  const btn=document.getElementById("clearBtn");
+  if(top) top.addEventListener("click", function(e){e.preventDefault(); clearEd();});
+  if(btn) btn.addEventListener("click", function(e){e.preventDefault(); clearEd();});
+});
 initDatabase().catch(function(e){
   handleOffline();
   document.getElementById('serverStatus').textContent='● Browser SQL engine failed to load';

@@ -86,28 +86,34 @@
 .view-data-btn:hover{background:#f5f7fa}
 .req-data{margin-top:10px;max-height:280px;overflow:auto;border-top:1px solid #e5e7eb;padding-top:8px}
 .panel-collapse{
-  position:absolute;
-  top:12px;
+  position:fixed;
+  top:72px;
   width:32px;
-  height:36px;
-  border:1px solid #d7dce2;
+  height:38px;
+  border:1px solid #cbd5df;
   background:#fff;
   color:#245a93;
-  border-radius:0 5px 5px 0;
+  border-radius:0 6px 6px 0;
   cursor:pointer;
-  z-index:20;
-  font-size:22px;
-  line-height:30px;
+  z-index:3000;
+  font-size:24px;
+  line-height:32px;
+  padding:0;
+  box-shadow:0 1px 4px rgba(0,0,0,.12);
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
-.panel-collapse:hover{background:#f3f7fb}
-.left-collapse{right:-32px}
-.right-collapse{left:-32px;border-radius:5px 0 0 5px}
+.panel-collapse:hover{background:#eef6ff;color:#0b65a3}
+.left-collapse{left:300px}
+.right-collapse{right:300px;border-radius:6px 0 0 6px}
 .left.collapsed{width:0!important;min-width:0!important;padding:0!important;border-right:0!important;overflow:visible!important}
 .left.collapsed>*:not(#leftCollapseBtn){display:none!important}
-.left.collapsed #leftCollapseBtn{display:block!important}
+.left.collapsed #leftCollapseBtn{display:flex!important;left:0}
 .right.collapsed{width:0!important;min-width:0!important;padding:0!important;border-left:0!important;overflow:visible!important}
 .right.collapsed>*:not(#rightCollapseBtn){display:none!important}
-.right.collapsed #rightCollapseBtn{display:block!important}
+.right.collapsed #rightCollapseBtn{display:flex!important;right:0}
+@media(max-width:1050px){.left-collapse{left:250px}.right-collapse{right:0}}
 
 </style><script src="https://cdn.jsdelivr.net/npm/sql.js@1.13.0/dist/sql-wasm.js"></script></head><body>
 <div class=top><div class=brand>Learn SQL - Online SQL Terminal</div><span class=offline style="background:#eefaf0;color:#176b34;border-color:#b8dfc0">ONLINE</span><div class=top-nav><button class="top-btn status" id="online-status">● Database connected</button><span id=serverStatus style="color:#16803a;font-size:11px;white-space:nowrap"></span><button class=top-btn onclick="openDatabaseModal()">Database</button><button class=top-btn onclick="openSettings()">Settings</button><button class=top-btn onclick="openAllQuestions()">View All Questions</button></div></div>
@@ -238,19 +244,33 @@ function changeDifficulty(){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
+function positionPanelArrows(){
+  const left=$('leftPanel'), right=$('rightPanel');
+  const lb=$('leftCollapseBtn'), rb=$('rightCollapseBtn');
+  if(!left||!right)return;
+  if(!left.classList.contains('collapsed')) lb.style.left=Math.round(left.getBoundingClientRect().right)+'px';
+  if(!right.classList.contains('collapsed')) rb.style.right=Math.round(window.innerWidth-right.getBoundingClientRect().width)+'px';
+}
+
 function toggleLeftPanel(){
   const p=$('leftPanel');
   const collapsed=p.classList.toggle('collapsed');
-  $('leftCollapseBtn').textContent=collapsed?'›':'‹';
-  $('leftCollapseBtn').title=collapsed?'Show database':'Hide database';
+  const b=$('leftCollapseBtn');
+  b.textContent=collapsed?'›':'‹';
+  b.title=collapsed?'Show database':'Hide database';
+  if(collapsed)b.style.left='0px'; else positionPanelArrows();
 }
 
 function toggleRightPanel(){
   const p=$('rightPanel');
   const collapsed=p.classList.toggle('collapsed');
-  $('rightCollapseBtn').textContent=collapsed?'‹':'›';
-  $('rightCollapseBtn').title=collapsed?'Show question bank':'Hide question bank';
+  const b=$('rightCollapseBtn');
+  b.textContent=collapsed?'‹':'›';
+  b.title=collapsed?'Show question bank':'Hide question bank';
+  if(collapsed)b.style.right='0px'; else positionPanelArrows();
 }
+
+window.addEventListener('resize',positionPanelArrows);
 
 function nextQ(){let f=$('filter').value;for(let n=1;n<=questions.length;n++){let i=(current+n)%questions.length;if(f==='All'||questions[i].difficulty===f){loadQ(i);window.scrollTo({top:0,behavior:'smooth'});return}}}
 function prevQ(){let f=$('filter').value;for(let n=1;n<=questions.length;n++){let i=(current-n+questions.length)%questions.length;if(f==='All'||questions[i].difficulty===f){loadQ(i);window.scrollTo({top:0,behavior:'smooth'});return}}}
@@ -482,7 +502,8 @@ function formatSQL(){let s=$('editor').value.replace(/\s+/g,' ').trim();['FROM',
 async function resetDB(){
   try{
     if(db) db.close();
-    await initDatabase().catch(err=>{
+    await positionPanelArrows();
+initDatabase().catch(err=>{
   const el=document.getElementById('online-status');
   if(el){el.textContent='● Browser SQL engine offline';el.classList.add('offline');}
   const st=document.getElementById('serverStatus');

@@ -7,7 +7,10 @@ import threading
 import traceback
 from pathlib import Path
 
-# Spark/Java settings must be configured BEFORE importing PySpark.
+# ---------------------------------------------------------------------------
+# Spark / Java configuration
+# These must be configured before importing PySpark.
+# ---------------------------------------------------------------------------
 os.environ.setdefault("SPARK_LOCAL_IP", "127.0.0.1")
 os.environ.setdefault("SPARK_LOCAL_HOSTNAME", "localhost")
 os.environ.setdefault("PYSPARK_PYTHON", "python3")
@@ -15,9 +18,10 @@ os.environ.setdefault("PYSPARK_DRIVER_PYTHON", "python3")
 
 
 def detect_java_home():
-    """Find Java 17 (preferred) or another installed Java runtime."""
+    """Find JAVA_HOME or an installed Java runtime."""
     configured = os.environ.get("JAVA_HOME")
     candidates = []
+
     if configured:
         candidates.append(Path(configured))
 
@@ -25,33 +29,57 @@ def detect_java_home():
     if java:
         candidates.append(Path(java).resolve().parent.parent)
 
-    candidates.extend([
-        Path("/usr/lib/jvm/java-17-openjdk-amd64"),
-        Path("/usr/lib/jvm/java-17-openjdk"),
-        Path("/usr/lib/jvm/java-11-openjdk-amd64"),
-        Path("/usr/lib/jvm/java-11-openjdk"),
-    ])
+    candidates.extend(
+        [
+            Path("/usr/lib/jvm/java-17-openjdk-amd64"),
+            Path("/usr/lib/jvm/java-17-openjdk"),
+            Path("/usr/lib/jvm/java-11-openjdk-amd64"),
+            Path("/usr/lib/jvm/java-11-openjdk"),
+        ]
+    )
 
     for home in candidates:
         if (home / "bin" / "java").exists():
             os.environ["JAVA_HOME"] = str(home)
             return str(home)
+
     return None
 
 
 JAVA_HOME_FOUND = detect_java_home()
 
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
-BASE = Path(__file__).resolve().parent
-DATA = json.loads((BASE / "data.json").read_text(encoding="utf-8"))
-QUESTIONS = json.loads((BASE / "questions.json").read_text(encoding="utf-8"))
 
-app = FastAPI(title="SQL Interview Practice - PySpark Backend", version="2.0.0")
+# ---------------------------------------------------------------------------
+# Data files
+# ---------------------------------------------------------------------------
+BASE = Path(__file__).resolve().parent
+
+try:
+    DATA = json.loads((BASE / "data.json").read_text(encoding="utf-8"))
+    QUESTIONS = json.loads(
+        (BASE / "questions.json").read_text(encoding="utf-8")
+    )
+except Exception as exc:
+    raise RuntimeError(f"Could not load data.json/questions.json: {exc}") from exc
+
+
+# ---------------------------------------------------------------------------
+# FastAPI
+# ---------------------------------------------------------------------------
+app = FastAPI(
+    title="SQL Interview Practice - PySpark Backend",
+    version="2.0.1",
+)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -66,6 +94,9 @@ class RunRequest(BaseModel):
     code: str = Field(min_length=1, max_length=50000)
 
 
+# ---------------------------------------------------------------------------
+# Spark state
+# ---------------------------------------------------------------------------
 spark_lock = threading.Lock()
 spark = None
 frames = {}
@@ -74,11 +105,18 @@ spark_error = None
 
 def java_version():
     java = shutil.which("java")
+
     if not java:
         return None
+
     try:
-        p = subprocess.run([java, "-version"], capture_output=True, text=True, timeout=5)
-        text = (p.stderr or p.stdout or "").splitlines()
+        process = subprocess.run(
+            [java, "-version"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        text = (process.stderr or process.stdout or "").splitlines()
         return text[0] if text else "unknown"
     except Exception:
         return "unknown"
@@ -92,8 +130,7 @@ def get_spark():
 
     if not JAVA_HOME_FOUND:
         spark_error = (
-            "Java was not found. Render must install OpenJDK 17 before starting PySpark. "
-            "Set JAVA_HOME to the Java 17 installation."
+            "Java was not found. Install OpenJDK 17 and set JAVA_HOME."
         )
         raise RuntimeError(spark_error)
 
@@ -111,18 +148,24 @@ def get_spark():
             .config("spark.driver.memory", "384m")
             .getOrCreate()
         )
+
         spark.sparkContext.setLogLevel("ERROR")
 
         for name in DATA["tables"]:
             meta = DATA["data"][name]
-            frames[name] = spark.createDataFrame(meta["rows"], meta["columns"])
+            frames[name] = spark.createDataFrame(
+                meta["rows"],
+                meta["columns"],
+            )
 
         spark_error = None
         return spark
+
     except Exception as exc:
         spark = None
         frames = {}
         spark_error = str(exc)
+
         raise RuntimeError(
             "Spark could not start. "
             f"JAVA_HOME={os.environ.get('JAVA_HOME', 'not set')}; "
@@ -131,12 +174,15 @@ def get_spark():
         ) from exc
 
 
-def clean_value(v):
-    if hasattr(v, "isoformat"):
-        return v.isoformat()
-    return v
+def clean_value(value):
+    if hasattr(value, "isoformat"):
+        return value.isoformat()
+    return value
 
 
+# ---------------------------------------------------------------------------
+# Health
+# ---------------------------------------------------------------------------
 @app.get("/api/health")
 def health():
     return {
@@ -150,11 +196,16 @@ def health():
     }
 
 
+# ---------------------------------------------------------------------------
+# Questions
+# ---------------------------------------------------------------------------
 @app.get("/api/question/{question_id}")
 def question(question_id: str):
-    q = next((x for x in QUESTIONS if x["id"] == question_id), None)
+    q = next((item for item in QUESTIONS if item["id"] == question_id), None)
+
     if not q:
-        raise HTTPException(404, "Question not found")
+        raise HTTPException(status_code=404, detail="Question not found")
+
     return {
         "id": q["id"],
         "title": q["title"],
@@ -165,80 +216,161 @@ def question(question_id: str):
     }
 
 
-# This is a practice service, not a general Python sandbox.
-# Keep the public endpoint limited to Spark/DataFrame operations.
+# ---------------------------------------------------------------------------
+# PySpark practice-code validation
+# ---------------------------------------------------------------------------
 BLOCKED_TEXT = [
-    "os.system", "subprocess", "socket", "shutil", "pathlib", "requests",
-    "urllib", "httpx", "open(", "input(", "eval(", "exec(", "compile(",
-    "__import__", "globals(", "locals(", "breakpoint(", "importlib",
+    "os.system",
+    "subprocess",
+    "socket",
+    "shutil",
+    "pathlib",
+    "requests",
+    "urllib",
+    "httpx",
+    "open(",
+    "input(",
+    "eval(",
+    "exec(",
+    "compile(",
+    "__import__",
+    "globals(",
+    "locals(",
+    "breakpoint(",
+    "importlib",
 ]
+
 ALLOWED_IMPORTS = {
     "pyspark",
     "pyspark.sql",
     "pyspark.sql.functions",
     "pyspark.sql.window",
 }
+
 SAFE_BUILTINS = {
-    "abs": abs, "all": all, "any": any, "bool": bool, "dict": dict,
-    "enumerate": enumerate, "float": float, "int": int, "len": len,
-    "list": list, "max": max, "min": min, "range": range, "round": round,
-    "set": set, "sorted": sorted, "str": str, "sum": sum, "tuple": tuple,
-    "zip": zip, "True": True, "False": False, "None": None,
+    "abs": abs,
+    "all": all,
+    "any": any,
+    "bool": bool,
+    "dict": dict,
+    "enumerate": enumerate,
+    "float": float,
+    "int": int,
+    "len": len,
+    "list": list,
+    "max": max,
+    "min": min,
+    "range": range,
+    "round": round,
+    "set": set,
+    "sorted": sorted,
+    "str": str,
+    "sum": sum,
+    "tuple": tuple,
+    "zip": zip,
+    "True": True,
+    "False": False,
+    "None": None,
 }
 
 
 def validate_user_code(code: str):
-    low = code.lower().replace(" ", "")
-    hits = [x for x in BLOCKED_TEXT if x.lower().replace(" ", "") in low]
+    normalized = code.lower().replace(" ", "")
+    hits = [
+        item
+        for item in BLOCKED_TEXT
+        if item.lower().replace(" ", "") in normalized
+    ]
+
     if hits:
-        raise HTTPException(400, "Blocked operation in practice code: " + ", ".join(hits))
+        raise HTTPException(
+            status_code=400,
+            detail="Blocked operation in practice code: "
+            + ", ".join(hits),
+        )
 
     try:
         tree = ast.parse(code, mode="exec")
     except SyntaxError as exc:
-        raise HTTPException(400, f"Python syntax error: {exc}") from exc
+        raise HTTPException(
+            status_code=400,
+            detail=f"Python syntax error: {exc}",
+        ) from exc
 
     for node in ast.walk(tree):
-        if isinstance(node, (ast.Import, ast.ImportFrom)):
-            module = node.module or ""
-            if isinstance(node, ast.Import):
-                names = [a.name for a in node.names]
-                bad = [n for n in names if n not in ALLOWED_IMPORTS]
-            else:
-                bad = [] if module in ALLOWED_IMPORTS else [module]
+        if isinstance(node, ast.Import):
+            bad = [
+                alias.name
+                for alias in node.names
+                if alias.name not in ALLOWED_IMPORTS
+            ]
             if bad:
-                raise HTTPException(400, "Only PySpark imports are allowed in practice code.")
+                raise HTTPException(
+                    status_code=400,
+                    detail="Only PySpark imports are allowed in practice code.",
+                )
+
+        elif isinstance(node, ast.ImportFrom):
+            module = node.module or ""
+            if module not in ALLOWED_IMPORTS:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Only PySpark imports are allowed in practice code.",
+                )
 
 
 def run_user_code(code: str):
-    """Execute only after static validation, with a reduced builtin set."""
+    """Execute validated PySpark practice code."""
     validate_user_code(code)
-    env = {"spark": spark, "F": F, **frames}
-    globals_dict = {"__builtins__": SAFE_BUILTINS}
+
+    env = {
+        "spark": spark,
+        "F": F,
+        **frames,
+    }
+
+    globals_dict = {
+        "__builtins__": SAFE_BUILTINS,
+    }
+
     exec(code, globals_dict, env)
+
     return env.get("result")
 
 
+# ---------------------------------------------------------------------------
+# Execute PySpark
+# ---------------------------------------------------------------------------
 @app.post("/api/pyspark/run")
 def run_pyspark(req: RunRequest):
-    q = next((x for x in QUESTIONS if x["id"] == req.question_id), None)
+    q = next((item for item in QUESTIONS if item["id"] == req.question_id), None)
+
     if not q:
-        raise HTTPException(404, "Question not found")
+        raise HTTPException(status_code=404, detail="Question not found")
 
     with spark_lock:
         try:
             get_spark()
+
             result = run_user_code(req.code)
 
             if result is None or not hasattr(result, "collect"):
                 return {
                     "ok": False,
-                    "error": "Your code must create the final DataFrame in a variable named result.",
+                    "error": (
+                        "Your code must create the final DataFrame "
+                        "in a variable named result."
+                    ),
                 }
 
             rows = result.collect()
             cols = result.columns
-            payload = [[clean_value(r[c]) for c in cols] for r in rows]
+
+            payload = [
+                [clean_value(row[column]) for column in cols]
+                for row in rows
+            ]
+
             expected = q.get("expected", [])
             matched = payload == expected
 
@@ -253,11 +385,16 @@ def run_pyspark(req: RunRequest):
                 "message": (
                     "Correct answer"
                     if matched
-                    else "Code executed successfully, but the result does not match the expected output."
+                    else (
+                        "Code executed successfully, but the result "
+                        "does not match the expected output."
+                    )
                 ),
             }
+
         except HTTPException:
             raise
+
         except Exception as exc:
             return {
                 "ok": False,
@@ -266,18 +403,54 @@ def run_pyspark(req: RunRequest):
             }
 
 
+# ---------------------------------------------------------------------------
+# Validate PySpark structure without executing Spark
+# ---------------------------------------------------------------------------
 @app.post("/api/pyspark/validate")
 def validate(req: RunRequest):
     issues = []
     code = req.code
+
+    try:
+        validate_user_code(code)
+    except HTTPException as exc:
+        return {
+            "ok": False,
+            "issues": [str(exc.detail)],
+        }
+
     if "result" not in code:
-        issues.append("Create the final DataFrame in a variable named result.")
-    for table in next((q["tables"] for q in QUESTIONS if q["id"] == req.question_id), []):
-        if table not in code:
-            issues.append(f"Reference the required DataFrame: {table}")
-    return {"ok": not issues, "issues": issues}
+        issues.append(
+            "Create the final DataFrame in a variable named result."
+        )
+
+    question = next(
+        (item for item in QUESTIONS if item["id"] == req.question_id),
+        None,
+    )
+
+    if question:
+        for table in question["tables"]:
+            if table not in code:
+                issues.append(
+                    f"Reference the required DataFrame: {table}"
+                )
+
+    return {
+        "ok": not issues,
+        "issues": issues,
+    }
 
 
+# ---------------------------------------------------------------------------
+# Local entry point
+# ---------------------------------------------------------------------------
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app:app", host="0.0.0.0", port=int(os.environ.get("PORT", "8000")), reload=False)
+
+    uvicorn.run(
+        "app:app",
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", "8000")),
+        reload=False,
+    )

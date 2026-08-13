@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Install Java 21 required by PySpark
+# Install Java required by PySpark
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        openjdk-21-jre-headless \
@@ -20,6 +20,7 @@ ENV SPARK_LOCAL_IP=127.0.0.1
 ENV SPARK_LOCAL_HOSTNAME=localhost
 ENV PYSPARK_PYTHON=python3
 ENV PYSPARK_DRIVER_PYTHON=python3
+ENV SPARK_TESTING=true
 
 WORKDIR /app
 
@@ -29,5 +30,7 @@ RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
 COPY . .
+
+EXPOSE 10000
 
 CMD ["sh", "-c", "uvicorn app:app --host 0.0.0.0 --port ${PORT:-10000}"]

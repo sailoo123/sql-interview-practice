@@ -141,7 +141,7 @@
     <button id="clearTopBtn" type="button" class="toggle clear-control">Clear</button>
   </div>
   <div id="sqlModeNote" class="editor-mode-note">Write your SQL query and click Run.</div>
-  <div id="pysparkModeNote" class="editor-mode-note editor-hidden">Write the PySpark equivalent for the same interview question. Browser mode validates the code structure; real Spark execution can be connected in the backend stage.</div>
+  <div id="pysparkModeNote" class="editor-mode-note editor-hidden">Write the PySpark equivalent for the same interview question. Click Validate PySpark to execute the code on the Spark backend and compare the result.</div>
   <textarea id=editor spellcheck=false placeholder="Write your SQL query here..."></textarea>
   <textarea id=pysparkEditor class="editor-hidden" spellcheck=false placeholder="Write your PySpark code here..."></textarea>
   <div id="sqlButtons" class="buttons sql-buttons">
@@ -491,34 +491,76 @@ function switchEditor(mode){
   (isSql?sqlEd:pyEd).focus();
 }
 
-function validatePySpark(){
+async function validatePySpark(){
   const code=$('pysparkEditor').value.trim();
   if(!code){
     $('status').innerHTML='<span class=error>✗ Please enter your PySpark code.</span>';
     return;
   }
+
   const q=questions[current];
-  const issues=[];
-  if(!/from\s+pyspark\.sql\s+import\s+functions\s+as\s+F/i.test(code) && !/pyspark\.sql\.functions/i.test(code)){
-    issues.push('Consider importing pyspark.sql.functions as F.');
-  }
-  const needed=(q.tables||[]).filter(t=>new RegExp('\\b'+t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','i').test(code));
-  if((q.tables||[]).length && needed.length===0){
-    issues.push('The solution does not appear to reference the required table DataFrame(s): '+q.tables.join(', ')+'.');
-  }
-  if(!/\bresult\s*=/.test(code)){
-    issues.push('Create the final DataFrame in a variable such as result.');
-  }
-  if(issues.length){
-    $('status').innerHTML='<span class=error>✗ PySpark practice check found issues.</span>';
-    const box='<div class="errorguide"><div class="errtitle">Review these items:</div>'+issues.map(x=>'<div>• '+esc(x)+'</div>').join('')+'<div class="hinttitle">Tip</div><div>Use the <b>Show PySpark Solution</b> link above if you want to compare your approach.</div></div>';
-    $('result').innerHTML=box;
-  }else{
-    $('status').innerHTML='<span class=success>✓ PySpark code structure looks good.</span>';
-    $('result').innerHTML='<div class="successguide"><b>PySpark code captured successfully.</b><br>Browser mode performs a lightweight structure check only; it does not execute Spark code.</div>';
+  $('status').innerHTML='<span style="color:#555">⏳ Running PySpark on Spark backend...</span>';
+  $('result').innerHTML='<div style="padding:12px;color:#6b7280">Starting Spark and executing your PySpark code...</div>';
+
+  try{
+    const response=await fetch('https://sql-interview-practice-2.onrender.com/api/pyspark/run',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        question_id:String(q.id),
+        code:code
+      })
+    });
+
+    let data={};
+    try{
+      data=await response.json();
+    }catch(e){
+      throw new Error('Backend returned an invalid response. HTTP '+response.status);
+    }
+
+    if(!response.ok){
+      throw new Error(data.detail || data.error || ('Backend request failed. HTTP '+response.status));
+    }
+
+    if(!data.ok){
+      $('status').innerHTML='<span class=error>✗ PySpark execution failed.</span>';
+      $('result').innerHTML='<div class="errorguide">'+
+        '<div class="errtitle">Spark Error</div>'+
+        '<div>'+esc(data.error || 'Unknown Spark error')+'</div>'+
+        (data.traceback ? '<details style="margin-top:8px"><summary>Technical details</summary><pre class="solution">'+esc(data.traceback)+'</pre></details>' : '')+
+        '</div>';
+      return;
+    }
+
+    if(data.matched){
+      $('status').innerHTML='<span class=success>✓ Correct PySpark answer!</span>';
+      $('result').innerHTML='<div class="successguide">'+
+        '<b>✓ Spark execution successful</b><br>'+
+        '✓ Your output matches the expected answer.<br><br>'+
+        '<b>Rows returned:</b> '+data.row_count+
+        '</div>';
+    }else{
+      $('status').innerHTML='<span class=error>✗ Code executed, but the answer is incorrect.</span>';
+      $('result').innerHTML='<div class="errorguide">'+
+        '<div class="errtitle">PySpark executed successfully, but the result does not match the expected output.</div>'+
+        '<div><b>Your output:</b></div>'+
+        '<pre class="solution">'+esc(JSON.stringify(data.rows || [],null,2))+'</pre>'+ 
+        '<div class="hinttitle">Tip</div>'+
+        '<div>Check your filters, joins, grouping, selected columns, and ordering. Use <b>Show PySpark Solution</b> if you want to compare your approach.</div>'+ 
+        '</div>';
+    }
+  }catch(error){
+    console.error('PySpark validation error:',error);
+    $('status').innerHTML='<span class=error>✗ Could not execute PySpark.</span>';
+    $('result').innerHTML='<div class="errorguide">'+
+      '<div class="errtitle">Backend / Spark connection error</div>'+ 
+      '<div>'+esc(error.message || String(error))+'</div>'+ 
+      '<div class="hinttitle">Check</div>'+ 
+      '<div>Make sure the Render service is Live and that <code>/api/health</code> is reachable.</div>'+ 
+      '</div>';
   }
 }
-
 function formatPySpark(){
   const ed=$('pysparkEditor');
   let s=ed.value.replace(/\r\n/g,'\n').replace(/[ \t]+$/gm,'').trim();

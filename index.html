@@ -134,14 +134,14 @@
 <aside class="left" id="leftPanel"><button class="panel-collapse left-collapse" id="leftCollapseBtn" type="button" onclick="toggleLeftPanel()" title="Hide database">‹</button><h3>SQL Database</h3><div class=db><div class=dbhead id="dbToggle" onclick="toggleDatabaseCatalog()"><span id="dbArrow" class="db-toggle">▸</span><b>practice.db</b><span class=db-meta id=dbmeta>18 tables</span><span style="color:#16803a">●</span></div><div id="dbContent" class="db-content hide"><div class="db-search-wrap"><input id=search class=search placeholder="Search datasets / tables..." oninput=renderTables()></div><div id=tables></div></div></div></aside>
 <main class=center>
 <div class=question><div class=qbar><span class=label>Question <span id="qNumber" style="font-size:13px;color:#6b7280;font-weight:400;margin-left:4px"></span></span><select id=filter class=select onchange=changeDifficulty()><option>All</option><option>Easy</option><option>Medium</option><option>Hard</option></select><button class=prev onclick=prevQ()>‹ Previous Question</button><button class=next onclick=nextQ()>Next Question ›</button></div><h2 id=title class=title></h2><div id=tags></div><p id=prompt></p><div><span id=requiredToggle class=toggle onclick=toggleRequired()>▸ Show Required Tables</span></div><div id=requiredSection class=hide><div class=required>Required tables</div><div id=req class="required-table-list"></div><div id=schema class="req-detail"></div></div><div><span class=toggle onclick=toggle('hint')>💡 Show Hint</span><span class=toggle onclick=toggle('expected')>▸ Show Expected Output</span><span class=toggle onclick=toggle('solution')>▸ Show SQL Solution</span><span class=toggle onclick=toggle('pysparkSolution')>▸ Show PySpark Solution</span></div><div id=hint class="hint hide"></div><div id=expected class="hide" style="margin-top:10px"><b style="font-size:12px">Expected Output</b><div id=expectedTable class=preview></div></div><div id=solution class="hide"><b style="font-size:12px">SQL Solution</b><div id=solutionText class=solution></div></div><div id=pysparkSolution class="hide"><b style="font-size:12px">PySpark Solution</b><div id=pysparkSolutionText class=solution></div></div></div>
-<div style="font-size:12px;color:#555;margin-top:10px">Connected to a browser-based SQLite database. Type your SQL below and click <b>Run</b>. The checker validates only the result returned by your SQL.</div><div class=editor-wrap>
+<div style="font-size:12px;color:#555;margin-top:10px">Connected to a browser-based SQLite database. Type your SQL below and click <b>Run</b>. The checker validates your result and, where needed, tests the query logic against a hidden data variation.</div><div class=editor-wrap>
   <div class=tabs>
     <button type="button" id="sqlTab" class="editor-tab active" onclick="switchEditor('sql')">SQL Query</button>
     <button type="button" id="pysparkTab" class="editor-tab" onclick="switchEditor('pyspark')">PySpark Code</button>
     <button id="clearTopBtn" type="button" class="toggle clear-control">Clear</button>
   </div>
   <div id="sqlModeNote" class="editor-mode-note">Write your SQL query and click Run.</div>
-  <div id="pysparkModeNote" class="editor-mode-note editor-hidden">Write the PySpark equivalent for the same interview question. Click Validate PySpark to execute the code on the Spark backend and compare the result.</div>
+  <div id="pysparkModeNote" class="editor-mode-note editor-hidden">Write the PySpark equivalent for the same interview question. Runs your PySpark code on the local Spark backend and compares the result with the expected output.</div>
   <textarea id=editor spellcheck=false placeholder="Write your SQL query here..."></textarea>
   <textarea id=pysparkEditor class="editor-hidden" spellcheck=false placeholder="Write your PySpark code here..."></textarea>
   <div id="sqlButtons" class="buttons sql-buttons">
@@ -430,10 +430,12 @@ function showSuccessPopup(message){
 }
 
 let db=null;
+let SQLLib=null;
 async function initDatabase(){
   const SQL = await initSqlJs({
     locateFile: file => 'https://cdn.jsdelivr.net/npm/sql.js@1.13.0/dist/'+file
   });
+  SQLLib = SQL;
   db = new SQL.Database();
 
   for(const t of tables){
@@ -469,6 +471,8 @@ function resultToArray(result){
   };
 }
 
+const PYSPARK_API_BASE = 'http://127.0.0.1:8000';
+
 let editorMode='sql';
 
 function switchEditor(mode){
@@ -497,70 +501,37 @@ async function validatePySpark(){
     $('status').innerHTML='<span class=error>✗ Please enter your PySpark code.</span>';
     return;
   }
-
   const q=questions[current];
-  $('status').innerHTML='<span style="color:#555">⏳ Running PySpark on Spark backend...</span>';
-  $('result').innerHTML='<div style="padding:12px;color:#6b7280">Starting Spark and executing your PySpark code...</div>';
-
+  $('status').innerHTML='<span style="color:#2563eb">⏳ Running PySpark on the backend...</span>';
+  $('result').innerHTML='<div style="padding:12px;color:#2563eb">Starting Spark and executing your PySpark code...</div>';
   try{
-    const response=await fetch('https://sql-interview-practice-2.onrender.com/api/pyspark/run',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        question_id:String(q.id),
-        code:code
-      })
+    const response=await fetch(PYSPARK_API_BASE+'/api/pyspark/run',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({question_id:q.id,code})
     });
-
-    let data={};
-    try{
-      data=await response.json();
-    }catch(e){
-      throw new Error('Backend returned an invalid response. HTTP '+response.status);
-    }
-
-    if(!response.ok){
-      throw new Error(data.detail || data.error || ('Backend request failed. HTTP '+response.status));
-    }
-
+    const data=await response.json();
+    if(!response.ok) throw new Error(data.detail||'Backend request failed');
     if(!data.ok){
       $('status').innerHTML='<span class=error>✗ PySpark execution failed.</span>';
-      $('result').innerHTML='<div class="errorguide">'+
-        '<div class="errtitle">Spark Error</div>'+
-        '<div>'+esc(data.error || 'Unknown Spark error')+'</div>'+
-        (data.traceback ? '<details style="margin-top:8px"><summary>Technical details</summary><pre class="solution">'+esc(data.traceback)+'</pre></details>' : '')+
-        '</div>';
+      $('result').innerHTML='<div class="errorguide"><div class="errtitle">PySpark Error</div><pre style="white-space:pre-wrap;margin:8px 0">'+esc(data.error||'Unknown error')+'</pre></div>';
       return;
     }
-
-    if(data.matched){
-      $('status').innerHTML='<span class=success>✓ Correct PySpark answer!</span>';
-      $('result').innerHTML='<div class="successguide">'+
-        '<b>✓ Spark execution successful</b><br>'+
-        '✓ Your output matches the expected answer.<br><br>'+
-        '<b>Rows returned:</b> '+data.row_count+
-        '</div>';
-    }else{
-      $('status').innerHTML='<span class=error>✗ Code executed, but the answer is incorrect.</span>';
-      $('result').innerHTML='<div class="errorguide">'+
-        '<div class="errtitle">PySpark executed successfully, but the result does not match the expected output.</div>'+
-        '<div><b>Your output:</b></div>'+
-        '<pre class="solution">'+esc(JSON.stringify(data.rows || [],null,2))+'</pre>'+ 
-        '<div class="hinttitle">Tip</div>'+
-        '<div>Check your filters, joins, grouping, selected columns, and ordering. Use <b>Show PySpark Solution</b> if you want to compare your approach.</div>'+ 
-        '</div>';
-    }
-  }catch(error){
-    console.error('PySpark validation error:',error);
-    $('status').innerHTML='<span class=error>✗ Could not execute PySpark.</span>';
-    $('result').innerHTML='<div class="errorguide">'+
-      '<div class="errtitle">Backend / Spark connection error</div>'+ 
-      '<div>'+esc(error.message || String(error))+'</div>'+ 
-      '<div class="hinttitle">Check</div>'+ 
-      '<div>Make sure the Render service is Live and that <code>/api/health</code> is reachable.</div>'+ 
-      '</div>';
+    $('status').innerHTML=data.matched
+      ? '<span class=success>✓ Correct PySpark answer — '+data.row_count+' row(s)</span>'
+      : '<span class=error>✗ PySpark executed, but the result does not match the expected answer.</span>';
+    let h='<table><tr>'+data.columns.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr>';
+    data.rows.forEach(r=>{h+='<tr>'+r.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>';});
+    h+='</table>';
+    const guide=data.matched
+      ? '<div class="successguide"><b>✓ PySpark answer is correct.</b></div>'
+      : '<div class="errorguide"><div class="errtitle">Result does not match</div><div>Compare your output with <b>Show Expected Output</b>.</div></div>';
+    $('result').innerHTML=guide+'<div class="preview" style="margin-top:10px;overflow:auto">'+h+'</div>';
+  }catch(err){
+    $('status').innerHTML='<span class=error>✗ Could not connect to PySpark backend.</span>';
+    $('result').innerHTML='<div class="errorguide"><div class="errtitle">Backend not available</div><div>'+esc(err.message||String(err))+'</div><div class="hinttitle">Start the backend</div><div>Run <code>python app.py</code> inside the backend folder, then try again.</div></div>';
   }
 }
+
 function formatPySpark(){
   const ed=$('pysparkEditor');
   let s=ed.value.replace(/\r\n/g,'\n').replace(/[ \t]+$/gm,'').trim();
@@ -571,6 +542,53 @@ function showPyspark(){
   const el=$('pysparkSolution');
   if(el){
     el.classList.remove('hide');
+  }
+}
+
+
+function sameQueryResult(a,b){
+  if(!a || !b || !a.columns || !b.columns) return false;
+  const norm=v=>v===null?null:String(v);
+  const normCol=s=>String(s).toLowerCase().replace(/^.*\./,'').replace(/[\s_]+/g,'');
+  const colsA=a.columns.map(normCol), colsB=b.columns.map(normCol);
+  if(colsA.length!==colsB.length || colsA.some((c,i)=>c!==colsB[i])) return false;
+  if(a.rows.length!==b.rows.length) return false;
+  const key=r=>JSON.stringify(r.map(norm));
+  return a.rows.every((r,i)=>key(r)===key(b.rows[i]));
+}
+
+function hiddenLogicCheck(q,sql){
+  // SQL01 can accidentally pass on the fixed dataset because SQLite treats
+  // a multi-row scalar subquery as a single value. Test against a cloned,
+  // slightly perturbed dataset so the query must actually compare each
+  // employee with the average of that employee's department.
+  if(q.id!=='SQL01') return {ok:true};
+
+  if(!SQLLib) return {ok:true};
+
+  let testDb=null;
+  try{
+    testDb=new SQLLib.Database(db.export());
+
+    // Move one Sales employee's salary high enough to change the Sales
+    // department average without changing the Data Engineering average.
+    testDb.run(
+      'UPDATE employees SET salary=1120000 WHERE employee_id=12'
+    );
+
+    const actual=resultToArray(testDb.exec(sql));
+    const oracle=resultToArray(testDb.exec(q.sql));
+
+    return {
+      ok:sameQueryResult(actual,oracle),
+      reason:'Your query matched the visible output, but it does not produce the same result when department salaries change. Compare each employee against the average of their own department.'
+    };
+  }catch(e){
+    // Do not block an otherwise valid query merely because the hidden test
+    // cannot be executed in an unusual browser/runtime situation.
+    return {ok:true};
+  }finally{
+    if(testDb) testDb.close();
   }
 }
 
@@ -633,17 +651,25 @@ async function runQuery(){
     const orderMatch=expectedRows.length===actualRows.length &&
       expectedRows.every((r,i)=>rowsAligned[i] && key(r)===key(rowsAligned[i]));
 
+    const logicCheck=hiddenLogicCheck(q,sql);
+    const logicMatch=logicCheck.ok;
+
     let feedback=[];
     if(missing.length) feedback.push('Missing required column(s): '+missing.join(', ')+'.');
     if(extra.length) feedback.push('Extra column(s) returned: '+extra.join(', ')+'.');
     if(missing.length===0 && !rowsMatch) feedback.push('The returned rows/values do not match the expected result.');
     if(asksSort && rowsMatch && !orderMatch) feedback.push('The rows are correct, but the required sorting/order is different.');
+    if(rowsMatch && (!asksSort || orderMatch) && !logicMatch) feedback.push(logicCheck.reason);
 
-    if(missing.length===0 && rowsMatch && (!asksSort || orderMatch)){
+    if(missing.length===0 && rowsMatch && (!asksSort || orderMatch) && logicMatch){
       $('status').innerHTML='<span class=success>✓ Correct answer — '+actualRows.length+' row(s)</span>';
       solved.add(q.id);
       updateProgress();
       showSuccessPopup('Congratulations on solving the question.');
+    }else if(missing.length===0 && rowsMatch && (!asksSort || orderMatch) && !logicMatch){
+      $('status').innerHTML='<span class=error>✗ Your query matches the current output, but the SQL logic is not correct for all valid data.</span>';
+      const tutor=tutorForQuestion(q,sql,actualCols,actualRows,expectedCols,expectedRows);
+      showTutor('The visible test data was not enough to distinguish your query. '+logicCheck.reason,tutor);
     }else if(missing.length===0 && rowsMatch && asksSort && !orderMatch){
       $('status').innerHTML='<span style="color:#9a6700">⚠ Correct rows, but the required ORDER BY is missing or different.</span>';
     }else{

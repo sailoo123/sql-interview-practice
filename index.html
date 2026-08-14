@@ -573,7 +573,7 @@ function hiddenLogicCheck(q,sql){
     // Move one Sales employee's salary high enough to change the Sales
     // department average without changing the Data Engineering average.
     testDb.run(
-      'UPDATE employees SET salary=1120000 WHERE employee_id=12'
+      'UPDATE employees SET salary=1000000 WHERE employee_id=12'
     );
 
     const actual=resultToArray(testDb.exec(sql));
@@ -581,15 +581,39 @@ function hiddenLogicCheck(q,sql){
 
     return {
       ok:sameQueryResult(actual,oracle),
-      reason:'Your query matched the visible output, but it does not produce the same result when department salaries change. Compare each employee against the average of their own department.'
+      reason:'What needs to be fixed: the AVG subquery is not correlated to the outer employee. It calculates department averages, but the outer employee is not restricted to the average for that employee\'s department.'
     };
   }catch(e){
-    // Do not block an otherwise valid query merely because the hidden test
-    // cannot be executed in an unusual browser/runtime situation.
-    return {ok:true};
+    return {ok:false,reason:'The hidden logic test could not be executed. Please use a correlated subquery or equivalent department-average logic.'};
   }finally{
     if(testDb) testDb.close();
   }
+}
+
+function tutorForQuestion(q,sql,actualCols,actualRows,expectedCols,expectedRows){
+  const missing=expectedCols.filter(c=>!actualCols.some(a=>String(a).toLowerCase().replace(/^.*\\./,'').replace(/[\\s_]+/g,'')===String(c).toLowerCase().replace(/[\\s_]+/g,'')));
+  const extra=actualCols.filter(a=>!expectedCols.some(c=>String(a).toLowerCase().replace(/^.*\\./,'').replace(/[\\s_]+/g,'')===String(c).toLowerCase().replace(/[\\s_]+/g,'')));
+  let html='';
+
+  if(missing.length) html+='<div><b>Missing:</b> '+esc(missing.join(', '))+'</div>';
+  if(extra.length) html+='<div><b>Extra:</b> '+esc(extra.join(', '))+'</div>';
+
+  if(q && q.id==='SQL01'){
+    html+= '<div><b>Hint:</b> Compare each employee with the average salary of <i>their own department</i>. How can the inner query refer to the outer employee\'s <code>department_id</code>?</div>';
+  }else if(q && q.hint){
+    html+='<div><b>Hint:</b> '+esc(q.hint)+'</div>';
+  }else{
+    html+='<div>Compare your returned columns and rows with the expected output, then review the question hint.</div>';
+  }
+  return html;
+}
+
+function showTutor(title,html){
+  $('result').insertAdjacentHTML('afterbegin',
+    '<div class="errorguide" style="margin-bottom:10px">'+
+      '<div class="errtitle">'+esc(title)+'</div>'+html+
+    '</div>'
+  );
 }
 
 async function runQuery(){
@@ -675,7 +699,7 @@ async function runQuery(){
     }else{
       $('status').innerHTML='<span class=error>✗ SQL executed, but the answer needs correction.</span>';
       const tutor=tutorForQuestion(q,sql,actualCols,actualRows,expectedCols,expectedRows);
-      showTutor('Here is what is wrong and how to improve it',tutor);
+      showTutor('Quick hint',tutor);
     }
 
     if(feedback.length){
